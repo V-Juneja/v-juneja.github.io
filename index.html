@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Classroom</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #01175e; /* Calming Dark Blue */
+            color: #c0c8d0; /* Softer text color */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling */
+            transition: background-color 0.5s, color 0.5s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure the body takes at least the full height of the viewport */
+            background: linear-gradient(to bottom, #01175e, #01175e); /* Gradient background */
+        }
+
+        /* Game Container Styles */
+        .game-container {
+            display: grid; /* Use grid for layout */
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive grid - wider cards */
+            gap: 25px; /* Spacing between grid items - increased spacing */
+            padding: 50px; /* Increased padding */
+            margin: 20px auto; /* Added margin for better centering */
+            max-width: 1300px; /* Limit container width */
+            position: relative;
+            z-index: 1;
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 80vh; /* Limit height */
+            scrollbar-width: thin; /* For Firefox */
+            scrollbar-color: #556880 #1e273d; /* Calming scrollbar */
+        }
+
+        .game-container::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+        }
+
+        .game-container::-webkit-scrollbar-track {
+            background: #1e273d; /* Background of the scrollbar track */
+        }
+
+        .game-container::-webkit-scrollbar-thumb {
+            background-color: #556880; /* Color of the scrollbar thumb */
+            border-radius: 5px; /* Rounded corners */
+        }
+
+        /* Game Card Styles */
+        .game-card {
+            width: 100%; /* Occupy full grid space */
+            height: 200px; /* Adjusted height */
+            background-color: rgba(255, 255, 255, 0.05); /* Glassmorphism background */
+            border-radius: 20px; /* Rounded corners */
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px; /* Adjusted padding */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+            backdrop-filter: blur(10px); /* Apply blur to create the glass effect */
+            box-sizing: border-box; /* Added to include padding and border in the element's total width and height */
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-icon {
+            max-width: 80%; /* Ensure icon fits */
+            max-height: 80%;
+            object-fit: contain;
+            transition: transform 0.3s ease-in-out; /* Smooth transition on hover */
+        }
+
+        .game-card:hover .game-icon {
+            transform: scale(1.1); /* Slightly enlarge the image on hover */
+        }
+
+        /* Popup Modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: rgba(0, 0, 0, 0.342); /* Darker modal background */
+            margin: 2% auto; /* Adjusted margin */
+            padding: 30px; /* Increased padding */
+            border-radius: 15px; /* Rounded corners */
+            width: 85%; /* Could be more or less, depending on screen size */
+            max-height: 90vh; /* Limit modal height */
+            overflow: auto; /* Enable scroll if content overflows */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 30px; /* Larger close button */
+            font-weight: bold;
+            transition: color 0.2s; /* Smooth color transition */
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-open {
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        #game-iframe {
+            border-radius: 10px; /* Rounded corners for iframe */
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 30px;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards on smaller screens */
+                gap: 15px;
+            }
+
+            .game-card {
+                height: 150px;
+                padding: 10px;
+            }
+        }
+
+        #footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8em;
+            color: #ffffff;
+            position: relative;
+            z-index: 10;
+            background-color: #01175e;
+            font-family: 'Poppins', sans-serif;
+        }
+        .a {
+            color: #01175e;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="game-container" id="games">
+        <div class="game-card" onclick="openGameModal('https://tetris.com/play-tetris')">
+            <img src="https://example.com/tetris-icon.png" alt="Tetris" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.pacman.com/')">
+            <img src="https://example.com/pacman-icon.png" alt="Pac-Man" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/21455-space-invaders.html')">
+            <img src="https://example.com/space-invaders-icon.png" alt="Space Invaders" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20062-galaga.html')">
+            <img src="https://example.com/galaga-icon.png" alt="Galaga" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20033-donkey-kong.html')">
+            <img src="https://example.com/donkey-kong-icon.png" alt="Donkey Kong" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20937-pong.html')">
+            <img src="https://example.com/pong-icon.png" alt="Pong Retro" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20060-asteroids-deluxe.html')">
+            <img src="https://example.com/asteroids-icon.png" alt="Asteroids" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20999-street-fighter-ii-the-world-warrior.html')">
+            <img src="https://example.com/street-fighter-ii-icon.png" alt="Street Fighter II" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://slither.io/')">
+            <img src="https://example.com/slither-io-icon.png" alt="Slither.io" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://krunker.io/')">
+            <img src="https://example.com/krunker-io-icon.png" alt="Krunker.io" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://shellshock.io/')">
+            <img src="https://example.com/shell-shockers-icon.png" alt="Shell Shockers" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://classic.minecraft.net/')">
+            <img src="https://example.com/minecraft-classic-icon.png" alt="Minecraft Classic" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://play2048.co/')">
+            <img src="https://example.com/2048-icon.png" alt="2048" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://flappybird.io/')">
+            <img src="https://example.com/flappy-bird-icon.png" alt="Flappy Bird" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://diep.io/')">
+            <img src="https://example.com/diep-io-icon.png" alt="Diep.io" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://paper-io.com/')">
+            <img src="https://example.com/paper-io-2-icon.png" alt="Paper.io 2" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://agar.io/')">
+            <img src="https://example.com/agar-io-icon.png" alt="Agar.io" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://zombsroyale.io/')">
+            <img src="https://example.com/zombs-royale-icon.png" alt="Zombs Royale" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://surviv.io/')">
+            <img src="https://example.com/surviv-io-icon.png" alt="Surviv.io" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://tankionline.com/')">
+            <img src="https://example.com/tanki-online-icon.png" alt="Tanki Online" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.chess.com/play/computer')">
+            <img src="https://example.com/chess-vs-ai-icon.png" alt="Chess vs AI" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://sudoku.com/')">
+            <img src="https://example.com/sudoku-icon.png" alt="Sudoku" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://worldofsolitaire.com/')">
+            <img src="https://example.com/solitaire-icon.png" alt="Solitaire" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.mathsisfun.com/games/connect4.html')">
+            <img src="https://example.com/connect-four-icon.png" alt="Connect Four" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.coolmathgames.com/0-brick-breaker')">
+            <img src="https://example.com/brick-breaker-icon.png" alt="Brick Breaker" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.crazygames.com/embed/raft-wars')">
+            <img src="https://example.com/raft-wars-icon.png" alt="Raft Wars" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://totaljerkface.com/happy_wheels.tjf')">
+            <img src="https://example.com/happy-wheels-icon.png" alt="Happy Wheels" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.smashflash.com/')">
+            <img src="https://example.com/super-smash-flash-2-icon.png" alt="Super Smash Flash 2" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://poki.com/en/g/temple-run-2')">
+            <img src="https://example.com/temple-run-2-icon.png" alt="Temple Run 2" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.crazygames.com/game/cut-the-rope')">
+            <img src="https://example.com/cut-the-rope-icon.png" alt="Cut the Rope" class="game-icon">
+        </div>
+
+        <div class="game-card" onclick="openGameModal('https://www.browserling.com/browse/win7/chrome/latest/https://google.com')">
+            <img src="https://example.com/web-browser-icon.png" alt="Web Browser" class="game-icon">
+        </div>
+    </div>
+    <style>
+    /* Snack bar styles */
+        #snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #00000073;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+
+
+    <div id="snackbar">This site was made using <a href="https://seeksimpler.com" target=_blank style="color: white; text-decoration: underline;">Seek</a></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadFavicons();
+            showSnackbar();
+        });
+
+        function showSnackbar() {
+            var snackbar = document.getElementById("snackbar");
+            snackbar.className = "show";
+        }
+    </script>
+    <!-- Popup Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <iframe id="game-iframe" width="100%" height="600" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- <footer id="footer">
+        Made with ❤️ by <a href="https://seeksimpler.com" target=_blank>Seek</a>
+    </footer> -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadFavicons();
+        });
+
+        function loadFavicons() {
+            const gameCards = document.querySelectorAll('.game-card');
+            gameCards.forEach(card => {
+                const url = card.getAttribute('onclick').match(/'([^']+)'/)[1];
+                const domain = new URL(url).hostname;
+                const faviconUrl = `https://${domain}/favicon.ico`;
+                const gameIcon = card.querySelector('.game-icon');
+                if (gameIcon) {
+                    // Use a promise to handle the image loading
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            gameIcon.src = faviconUrl;
+                            gameIcon.alt = `${domain} Favicon`;
+                            gameIcon.style.width = '80px';
+                            gameIcon.style.height = '80px';
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            // If the favicon fails to load, set a default image
+                            gameIcon.src = 'https://example.com/default-icon.png'; // Replace with your default icon URL
+                            gameIcon.alt = 'Default Icon';
+                            gameIcon.style.width = '80px';
+                            gameIcon.style.height = '80px';
+                            resolve(); // Resolve the promise even if there's an error
+                        };
+                        img.src = faviconUrl; // Start loading the favicon
+                    });
+                }
+            });
+        }
+
+
+        function openGameModal(url) {
+            document.getElementById("game-iframe").src = url; // Set the iframe source
+            document.getElementById("myModal").style.display = "block"; // Show the modal
+            document.body.classList.add("modal-open"); // Add class to body to disable scrolling
+        }
+
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none"; // Hide the modal
+            document.getElementById("game-iframe").src = ""; // Clear the iframe source
+            document.body.classList.remove("modal-open"); // Remove class to enable scrolling
+        }
+
+        // Close the modal when the user clicks anywhere outside of the modal
+        window.onclick = function(event) {
+            const modal = document.getElementById("myModal");
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
