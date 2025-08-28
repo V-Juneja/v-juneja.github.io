@@ -3,522 +3,1587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Classroom</title>
-
+    <title>Relay Mesh Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        /* General Styles */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #01175e; /* Calming Dark Blue */
-            color: #c0c8d0; /* Softer text color */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg: #f9fafb;
+            --card-bg: #ffffff;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevent scrolling */
-            transition: background-color 0.5s, color 0.5s;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        button.danger {
+            background-color: var(--danger);
+        }
+
+        button.danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .device-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .device-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .device-card.active {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .device-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .device-id {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        /* Chat Interface */
+        #messaging-section {
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Ensure the body takes at least the full height of the viewport */
-            background: linear-gradient(to bottom, #01175e, #01175e); /* Gradient background */
+            height: 600px;
         }
 
-        /* Game Container Styles */
-        .game-container {
-            display: grid; /* Use grid for layout */
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive grid - wider cards */
-            gap: 25px; /* Spacing between grid items - increased spacing */
-            padding: 50px; /* Increased padding */
-            margin: 20px auto; /* Added margin for better centering */
-            max-width: 1300px; /* Limit container width */
-            position: relative;
-            z-index: 1;
-            overflow-y: auto; /* Enable vertical scrolling */
-            max-height: 80vh; /* Limit height */
-            scrollbar-width: thin; /* For Firefox */
-            scrollbar-color: #556880 #1e273d; /* Calming scrollbar */
-        }
-
-        .game-container::-webkit-scrollbar {
-            width: 10px; /* Width of the scrollbar */
-        }
-
-        .game-container::-webkit-scrollbar-track {
-            background: #1e273d; /* Background of the scrollbar track */
-        }
-
-        .game-container::-webkit-scrollbar-thumb {
-            background-color: #556880; /* Color of the scrollbar thumb */
-            border-radius: 5px; /* Rounded corners */
-        }
-
-        /* Game Card Styles */
-        .game-card {
-            width: 100%; /* Occupy full grid space */
-            height: 200px; /* Adjusted height */
-            background-color: rgba(255, 255, 255, 0.05); /* Glassmorphism background */
-            border-radius: 20px; /* Rounded corners */
-            overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
+        #messages-container {
+            flex: 1;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px; /* Adjusted padding */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
-            backdrop-filter: blur(10px); /* Apply blur to create the glass effect */
-            box-sizing: border-box; /* Added to include padding and border in the element's total width and height */
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem 0.5rem 0 0;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
         }
 
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        #messages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
-        .game-icon {
-            max-width: 80%; /* Ensure icon fits */
-            max-height: 80%;
-            object-fit: contain;
-            transition: transform 0.3s ease-in-out; /* Smooth transition on hover */
-        }
-
-        .game-card:hover .game-icon {
-            transform: scale(1.1); /* Slightly enlarge the image on hover */
-        }
-
-        /* Popup Modal */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
-        }
-
-        .modal-content {
-            background-color: rgba(0, 0, 0, 0.342); /* Darker modal background */
-            margin: 2% auto; /* Adjusted margin */
-            padding: 30px; /* Increased padding */
-            border-radius: 15px; /* Rounded corners */
-            width: 85%; /* Could be more or less, depending on screen size */
-            max-height: 90vh; /* Limit modal height */
-            overflow: auto; /* Enable scroll if content overflows */
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 30px; /* Larger close button */
-            font-weight: bold;
-            transition: color 0.2s; /* Smooth color transition */
-        }
-
-        .close:hover,
-        .close:focus {
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal-open {
-            overflow: hidden; /* Prevent scrolling */
-        }
-
-        #game-iframe {
-            border-radius: 10px; /* Rounded corners for iframe */
-        }
-
-        /* Media Queries for Responsiveness */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 30px;
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards on smaller screens */
-                gap: 15px;
-            }
-
-            .game-card {
-                height: 150px;
-                padding: 10px;
-            }
-        }
-
-        #footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 0.8em;
-            color: #ffffff;
+        /* Message Styling */
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
             position: relative;
-            z-index: 10;
-            background-color: #01175e;
-            font-family: 'Poppins', sans-serif;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.2s ease-out;
+            font-size: 0.9375rem;
+            line-height: 1.4;
         }
-        .a {
-            color: #01175e;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* Incoming Messages */
+        .message.incoming {
+            background: #ffffff;
+            margin-right: auto;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        /* Outgoing Messages */
+        .message.outgoing {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        /* Message Header */
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .outgoing .message-header {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Message Status */
+        .status {
+            font-size: 0.7rem;
+            font-style: italic;
+            text-transform: capitalize;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            background: none;
+        }
+
+        .status.sent {
+            color: #10b981;
+        }
+
+        .outgoing .status.sent {
+            color: #a7f3d0;
+        }
+
+        .status.failed {
+            color: #ef4444;
+        }
+
+        .status.pending, .status.sending {
+            color: #f59e0b;
+        }
+
+        /* Message Time */
+        .message-time {
+            font-size: 0.65rem;
+            opacity: 0.8;
+            white-space: nowrap;
+            margin-left: 0.5rem;
+        }
+
+        .outgoing .message-time {
+            opacity: 0.8;
+        }
+
+        /* Message Content */
+        .message-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* No Messages State */
+        #no-messages-selected {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Loading State */
+        .loading {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        /* Message Form Container */
+        #message-form-container {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            background-color: #ffffff;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            border-radius: 0 0 0.5rem 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+        }
+
+        /* Message Input */
+        #message-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 200px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.5;
+            font-size: 0.9375rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Send Button */
+        #send-message-btn {
+            padding: 0 1.25rem;
+            height: 44px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #send-message-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #send-message-btn:active {
+            transform: translateY(1px);
+        }
+
+        #send-message-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status.pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.failed {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status.processing {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .error {
+            color: var(--danger);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: white;
+        }
+
+        #message-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        #message-input {
+            flex: 1;
+            min-height: 100px;
+        }
+
+        .tab {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-right: 1rem;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #device-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <h1>Relay Mesh Tester</h1>
 
-    <div class="game-container" id="games">
-        <div class="game-card" onclick="openGameModal('https://tetris.com/play-tetris')">
-            <img src="https://tetris.com/tetris-icon.png" alt="Tetris" class="game-icon">
+        <div id="auth-section" class="card">
+            <h2>Authentication</h2>
+            <div id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="btn-group">
+                    <button id="login-btn">Sign In</button>
+                    <button id="signup-btn">Sign Up</button>
+                </div>
+                <div id="auth-error" class="error hidden"></div>
+            </div>
+            <div id="user-info" class="hidden">
+                <p>Logged in as: <span id="user-email"></span></p>
+                <button id="logout-btn" class="danger">Sign Out</button>
+            </div>
         </div>
 
-        <div class="game-card" onclick="openGameModal('https://www.pacman.com/')">
-            <img src="https://www.pacman.com/pacman-icon.png" alt="Pac-Man" class="game-icon">
+        <div id="devices-section" class="card hidden">
+            <h2>My Devices</h2>
+            <div id="loading-devices">Loading devices...</div>
+            <div id="devices-container" class="hidden">
+                <div class="devices-grid" id="devices-grid"></div>
+                <div id="no-devices" class="hidden">
+                    <p>No devices found. Register this device to get started.</p>
+                    <button id="register-device-btn">Register This Device</button>
+                </div>
+            </div>
         </div>
 
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/21455-space-invaders.html')">
-            <img src="https://www.retrogames.cc/space-invaders-icon.png" alt="Space Invaders" class="game-icon">
+        <div id="messaging-section" class="card hidden">
+            <h3>Messages with <span id="target-device-name">[Select a device]</span></h3>
+            <div id="messages-container">
+                <div id="no-messages-selected">Select a device to start messaging</div>
+                <div id="messages"></div>
+            </div>
+            <div id="message-form-container" class="hidden">
+                <textarea id="message-input" placeholder="Type your message here..."></textarea>
+                <button id="send-message-btn" disabled>Send Message</button>
+            </div>
         </div>
 
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20062-galaga.html')">
-            <img src="https://www.retrogames.cc/galaga-icon.png" alt="Galaga" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20033-donkey-kong.html')">
-            <img src="https://www.retrogames.cc/donkey-kong-icon.png" alt="Donkey Kong" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20937-pong.html')">
-            <img src="https://www.retrogames.cc/pong-icon.png" alt="Pong Retro" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20060-asteroids-deluxe.html')">
-            <img src="https://www.retrogames.cc/asteroids-icon.png" alt="Asteroids" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.retrogames.cc/embed/20999-street-fighter-ii-the-world-warrior.html')">
-            <img src="https://www.retrogames.cc/street-fighter-ii-icon.png" alt="Street Fighter II" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://slither.io/')">
-            <img src="https://slither.io/slither-io-icon.png" alt="Slither.io" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://krunker.io/')">
-            <img src="https://krunker.io/krunker-io-icon.png" alt="Krunker.io" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://shellshock.io/')">
-            <img src="https://shellshock.io/shell-shockers-icon.png" alt="Shell Shockers" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://classic.minecraft.net/')">
-            <img src="https://classic.minecraft.net/minecraft-classic-icon.png" alt="Minecraft Classic" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://play2048.co/')">
-            <img src="https://play2048.co/2048-icon.png" alt="2048" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://flappybird.io/')">
-            <img src="https://flappybird.io/flappy-bird-icon.png" alt="Flappy Bird" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://diep.io/')">
-            <img src="https://diep.io/diep-io-icon.png" alt="Diep.io" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://paper-io.com/')">
-            <img src="https://paper-io.com/paper-io-2-icon.png" alt="Paper.io 2" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://agar.io/')">
-            <img src="https://agar.io/agar-io-icon.png" alt="Agar.io" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://zombsroyale.io/')">
-            <img src="https://zombsroyale.io/zombs-royale-icon.png" alt="Zombs Royale" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://surviv.io/')">
-            <img src="https://surviv.io/surviv-io-icon.png" alt="Surviv.io" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://tankionline.com/')">
-            <img src="https://tankionline.com/tanki-online-icon.png" alt="Tanki Online" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.chess.com/play/computer')">
-            <img src="https://www.chess.com/chess-vs-ai-icon.png" alt="Chess vs AI" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://sudoku.com/')">
-            <img src="https://sudoku.com/sudoku-icon.png" alt="Sudoku" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://worldofsolitaire.com/')">
-            <img src="https://worldofsolitaire.com/solitaire-icon.png" alt="Solitaire" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.mathsisfun.com/games/connect4.html')">
-            <img src="https://www.mathsisfun.com/games/connect-four-icon.png" alt="Connect Four" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.coolmathgames.com/0-brick-breaker')">
-            <img src="https://www.coolmathgames.com/brick-breaker-icon.png" alt="Brick Breaker" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.crazygames.com/embed/raft-wars')">
-            <img src="https://www.crazygames.com/raft-wars-icon.png" alt="Raft Wars" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://totaljerkface.com/happy_wheels.tjf')">
-            <img src="https://totaljerkface.com/happy-wheels-icon.png" alt="Happy Wheels" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.smashflash.com/')">
-            <img src="https://www.smashflash.com/super-smash-flash-2-icon.png" alt="Super Smash Flash 2" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://poki.com/en/g/temple-run-2')">
-            <img src="https://poki.com/temple-run-2-icon.png" alt="Temple Run 2" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.crazygames.com/game/cut-the-rope')">
-            <img src="https://www.crazygames.com/cut-the-rope-icon.png" alt="Cut the Rope" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.browserling.com/browse/win7/chrome/latest/https://google.com')">
-            <img src="https://www.browserling.com/web-browser-icon.png" alt="Web Browser" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2025/construct/298/mafia-getaway-cars/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/982/responsive/Mafia-Getaway-Cars-xs.jpg" alt="Mafia Getaway Cars" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2024/construct/314/nova-clicker/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/981/responsive/Nova-Clicker-xs.jpg" alt="Nova Clicker" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2025/unity/fast-food-rush/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/979/responsive/fast-food-rush-xs.jpg" alt="Fast Food Rush" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2025/unity/cookie-clicker-pro/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/971/responsive/Cookie-Clicker-Pro-Game-xs.jpg" alt="Cookie Clicker Pro" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2024/unity/drift-king/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/729/responsive/Drift-King-xs.jpg" alt="Drift King" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2021/3/love-tester/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/152/responsive/love-tester-xs.jpg" alt="Love Tester" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2022/unity/highway-traffic/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/32/responsive/Highway-Traffic-2-xs.jpg" alt="Highway Traffic" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2022/unity2/masked-special-forces/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/310/responsive/Masked-Special-Forces-FPS-xs.jpg" alt="Masked Special Forces" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2021/unity/stack-fire-ball/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/184/responsive/Stack-Fire-Ball-Game-xs.jpg" alt="Stack Fire Ball" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2023/unity2/gta-simulator/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/416/responsive/GTA-Simulator-xs.jpg" alt="GTA Simulator" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2023/q2/capybara-clicker-pro/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/554/responsive/Capybara-Clicker-Pro-xs.jpg" alt="Capybara Clicker Pro" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2023/unity/real-flight-simulator/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/342/responsive/Real-Flight-Simulator-2-xs.jpg" alt="Real Flight Simulator" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2024/unity3/stickman-gta-city/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/900/responsive/stickman-gta-city-free-xs.jpg" alt="Stickman GTA City" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://cloud.onlinegames.io/games/2024/construct/219/stickman-parkour/index-og.html')">
-            <img src="https://www.onlinegames.io/media/posts/871/responsive/stickman-parkour-OG-xs.jpg" alt="Stickman Parkour" class="game-icon">
-        </div>
-
-        <div class="game-card" onclick="openGameModal('https://www.onlinegames.io/games/2023/unity/drift-hunters-pro/index.html')">
-            <img src="https://www.onlinegames.io/media/posts/397/responsive/Drift-Hunters-Pro-xs.jpg" alt="Drift Hunters Pro" class="game-icon">
-        </div>
-           <h1 style="font-family: 'Poppins', sans-serif; color: #ffffff; text-align: center; margin: 20px 0; font-size: 2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
-               More Games Coming Soon! Why not check out 
-               <a href="https://seeksimpler.com" target="_blank" style="color: #426eff; text-decoration: none; font-weight: bold; transition: color 0.3s;">
-                   Seek
-               </a>?
-           </h1>
-    </div>
-    <style>
-    /* Snack bar styles */
-        #snackbar {
-            visibility: hidden;
-            min-width: 300px;
-            margin-left: -150px;
-            background-color: #426effa1; /* Brighter blue */
-            color: #fff;
-            text-align: center;
-            border-radius: 8px; /* More rounded corners */
-            padding: 20px; /* Increased padding */
-            position: fixed;
-            z-index: 1000; /* Higher z-index to ensure visibility */
-            left: 50%;
-            bottom: 30px;
-            font-size: 18px; /* Slightly larger font */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Added shadow for depth */
-            transition: all 0.3s ease; /* Smooth transition for appearance */
-        }
-
-        #snackbar.show {
-            visibility: visible;
-            transform: translateY(-10px); /* Slight upward movement on show */
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-    </style>
-
-
-    <div id="snackbar">This site was made using <a href="https://seeksimpler.com" target=_blank style="color: white; text-decoration: underline;">Seek</a></div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            loadFavicons();
-            showSnackbar();
-        });
-
-        function showSnackbar() {
-            var snackbar = document.getElementById("snackbar");
-            snackbar.className = "show";
-        }
-    </script>
-    <!-- Popup Modal -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <iframe id="game-iframe" width="100%" height="600" frameborder="0" allowfullscreen></iframe>
+        <div id="device-info-section" class="card hidden">
+            <h3>Device Information</h3>
+            <div id="device-info">Select a device to view details</div>
         </div>
     </div>
 
-    <!-- <footer id="footer">
-        Made with ❤️ by <a href="https://seeksimpler.com" target=_blank>Seek</a>
-    </footer> -->
-
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            setRandomSite();
-            loadFavicons();
+        // Supabase configuration
+        const SUPABASE_URL = 'https://ipcomrgjqvghgfadndmf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwY29tcmdqcXZnaGdmYWRuZG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQwNzAzMzEsImV4cCI6MjA2OTY0NjMzMX0.X0qOPmli83JvZSYbswaPPAtXP0r7838DuvRmI9Yb44M';
+
+        // Initialize Supabase client
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
         });
 
-        function loadFavicons() {
-            const gameCards = document.querySelectorAll('.game-card');
-            gameCards.forEach(card => {
-                const url = card.getAttribute('onclick').match(/'([^']+)'/)[1];
-                const domain = new URL(url).hostname;
-                const faviconUrl = `https://${domain}/favicon.ico`;
-                const gameIcon = card.querySelector('.game-icon');
-                if (gameIcon) {
-                    // Use a promise to handle the image loading
-                    new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            gameIcon.src = faviconUrl;
-                            gameIcon.alt = `${domain} Favicon`;
-                            gameIcon.style.width = '80px';
-                            gameIcon.style.height = '80px';
-                            resolve();
-                        };
-                        img.onerror = () => {
-                            // If the favicon fails to load, set a default image
-                            gameIcon.src = 'https://example.com/default-icon.png'; // Replace with your default icon URL
-                            gameIcon.alt = 'Default Icon';
-                            gameIcon.style.width = '80px';
-                            gameIcon.style.height = '80px';
-                            resolve(); // Resolve the promise even if there's an error
-                        };
-                        img.src = faviconUrl; // Start loading the favicon
-                    });
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const registerDeviceBtn = document.getElementById('register-device-btn');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageBtn = document.getElementById('send-message-btn');
+        const messagesContainer = document.getElementById('messages-container');
+        const messagesList = document.getElementById('messages');
+        const deviceInfo = document.getElementById('device-info');
+
+        // State
+        let currentUser = null;
+        let devices = [];
+        let selectedDeviceId = null;
+        let currentDeviceId = null;
+        let messageSubscription = null;
+        let pollingInterval = null; // For polling fallback
+
+        // Initialize the app
+        async function init() {
+            // Check for existing session
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                await handleAuthStateChange(session);
+            }
+
+            // Set up auth state listener
+            const { data: { subscription: authListener } } = supabaseClient.auth.onAuthStateChange(handleAuthStateChange);
+
+            // Set up event listeners
+            loginBtn.addEventListener('click', handleLogin);
+            signupBtn.addEventListener('click', handleSignup);
+            logoutBtn.addEventListener('click', handleLogout);
+            registerDeviceBtn.addEventListener('click', registerCurrentDevice);
+            sendMessageBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
                 }
+            });
+
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                });
             });
         }
 
-        function openGameModal(url) {
-            document.getElementById("game-iframe").src = url; // Set the iframe source
-            document.getElementById("myModal").style.display = "block"; // Show the modal
-            document.body.classList.add("modal-open"); // Add class to body to disable scrolling
-        }
-
-        function closeModal() {
-            document.getElementById("myModal").style.display = "none"; // Hide the modal
-            document.getElementById("game-iframe").src = ""; // Clear the iframe source
-            document.body.classList.remove("modal-open"); // Remove class to enable scrolling
-        }
-
-        // Close the modal when the user clicks anywhere outside of the modal
-        window.onclick = function(event) {
-            const modal = document.getElementById("myModal");
-            if (event.target == modal) {
-                closeModal();
+        // Show authentication error
+        function showAuthError(message, type = 'error') {
+            const authError = document.getElementById('auth-error');
+            if (authError) {
+                authError.textContent = message;
+                authError.className = type === 'error' ? 'error' : 'success';
+                authError.classList.remove('hidden');
+            } else {
+                console.error('Auth error element not found:', message);
             }
         }
 
-        // Array of safe sites with titles and favicon URLs
-        const safeSites = [
-            { title: "Google", favicon: "https://www.google.com/favicon.ico" },
-            { title: "Khan Academy", favicon: "https://www.khanacademy.org/favicon.ico" },
-            { title: "Wikipedia", favicon: "https://www.wikipedia.org/favicon.ico" },
-            { title: "BBC", favicon: "https://www.bbc.co.uk/favicon.ico" },
-            { title: "National Geographic", favicon: "https://www.nationalgeographic.com/favicon.ico" },
-            { title: "YouTube", favicon: "https://www.youtube.com/favicon.ico" },
-            { title: "Reddit", favicon: "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png" },
-            { title: "Stack Overflow", favicon: "https://stackoverflow.design/assets/img/favicon.ico" },
-            { title: "Twitter", favicon: "https://abs.twimg.com/favicons/twitter.ico" },
-            { title: "Facebook", favicon: "https://www.facebook.com/favicon.ico" },
-            { title: "LinkedIn", favicon: "https://static.licdn.com/scds/common/u/images/logos/favicons/v1/favicon.ico" },
-            { title: "GitHub", favicon: "https://github.githubassets.com/favicons/favicon.svg" },
-            { title: "Mozilla", favicon: "https://www.mozilla.org/favicon.ico" },
-            { title: "Quora", favicon: "https://www.quora.com/favicon.ico" },
-            { title: "Pinterest", favicon: "https://www.pinterest.com/favicon.ico" },
-            { title: "Coursera", favicon: "https://www.coursera.org/favicon.ico" },
-            // Add more sites as needed
-        ];
+        // Handle authentication state changes
+        async function handleAuthStateChange(event, session) {
+            console.log('Auth state changed:', event, session);
 
-        // Function to set a random site title and favicon
-        function setRandomSite() {
-            const randomSite = safeSites[Math.floor(Math.random() * safeSites.length)];
-            document.title = randomSite.title; // Set the document title
-            const link = document.createElement('link'); // Create a link element for the favicon
-            link.rel = 'icon';
-            link.href = randomSite.favicon; // Set the favicon URL
-            document.head.appendChild(link); // Append the link to the head
+            if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+                // User is signed in
+                currentUser = session.user;
+
+                // Get DOM elements
+                const userEmailEl = document.getElementById('user-email');
+                const loginForm = document.getElementById('login-form');
+                const userInfo = document.getElementById('user-info');
+                const authError = document.getElementById('auth-error');
+
+                // Update UI
+                if (userEmailEl) userEmailEl.textContent = currentUser.email || 'User';
+                if (loginForm) loginForm.classList.add('hidden');
+                if (userInfo) userInfo.classList.remove('hidden');
+                if (authError) authError.classList.add('hidden');
+
+                // Show devices section
+                const devicesSection = document.getElementById('devices-section');
+                const loadingDevices = document.getElementById('loading-devices');
+                const devicesContainer = document.getElementById('devices-container');
+
+                if (devicesSection) devicesSection.classList.remove('hidden');
+                if (loadingDevices) loadingDevices.classList.remove('hidden');
+                if (devicesContainer) devicesContainer.classList.add('hidden');
+
+                try {
+                    // Load devices
+                    await loadDevices();
+
+                    // Get or register current device
+                    await getOrRegisterCurrentDevice();
+                } catch (error) {
+                    console.error('Error in auth state change:', error);
+                    showAuthError('Error initializing application');
+                }
+
+            } else if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
+                // User is signed out
+                currentUser = null;
+
+                // Get DOM elements
+                const loginForm = document.getElementById('login-form');
+                const userInfo = document.getElementById('user-info');
+                const devicesSection = document.getElementById('devices-section');
+                const messagingSection = document.getElementById('messaging-section');
+                const deviceInfoSection = document.getElementById('device-info-section');
+
+                // Update UI
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (userInfo) userInfo.classList.add('hidden');
+                if (devicesSection) devicesSection.classList.add('hidden');
+                if (messagingSection) messagingSection.classList.add('hidden');
+                if (deviceInfoSection) deviceInfoSection.classList.add('hidden');
+
+                // Unsubscribe from realtime
+                if (messageSubscription) {
+                    messageSubscription.unsubscribe();
+                    messageSubscription = null;
+                }
+                // Stop polling
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            }
         }
+
+        // Handle login
+        async function handleLogin() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            if (!emailInput || !passwordInput) {
+                console.error('Email or password input elements not found');
+                return;
+            }
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showAuthError('Please enter both email and password');
+                return;
+            }
+
+            try {
+                showAuthError('Signing in...', 'success');
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                console.log('Login successful, user:', data.user);
+                // handleAuthStateChange will be called automatically by the auth state change listener
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError(error.message || 'Login failed. Please try again.');
+
+                // Clear password field on error
+                if (passwordInput) passwordInput.value = '';
+            }
+        }
+
+        // Handle signup
+        async function handleSignup() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            if (!emailInput || !passwordInput) {
+                console.error('Email or password input elements not found');
+                return;
+            }
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showAuthError('Please enter both email and password');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters long');
+                return;
+            }
+
+            try {
+                showAuthError('Creating your account...', 'success');
+
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: window.location.origin
+                    }
+                });
+
+                if (error) throw error;
+
+                console.log('Signup successful, data:', data);
+                showAuthError('Check your email for the confirmation link! You can close this window after confirming.', 'success');
+
+                // Clear form on success
+                if (emailInput) emailInput.value = '';
+                if (passwordInput) passwordInput.value = '';
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAuthError(error.message || 'Signup failed. Please try again.');
+
+                // Clear password field on error
+                if (passwordInput) passwordInput.value = '';
+            }
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            // handleAuthStateChange will be called automatically
+        }
+
+        // Show authentication error
+        function showAuthError(message, type = 'error') {
+            const authErrorEl = document.getElementById('auth-error');
+            if (!authErrorEl) {
+                console.error('Auth error element not found. Message:', message);
+                return;
+            }
+
+            try {
+                authErrorEl.textContent = message;
+                authErrorEl.className = type === 'error' ? 'error' : 'success';
+                authErrorEl.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error showing auth error:', error);
+            }
+        }
+
+        // Load user's devices
+        async function loadDevices() {
+            // Get DOM elements
+            const loadingEl = document.getElementById('loading-devices');
+            const noDevicesEl = document.getElementById('no-devices');
+            const devicesContainerEl = document.getElementById('devices-container');
+
+            try {
+                // Show loading state
+                if (loadingEl) loadingEl.classList.remove('hidden');
+                if (noDevicesEl) noDevicesEl.classList.add('hidden');
+                if (devicesContainerEl) devicesContainerEl.classList.add('hidden');
+
+                // Fetch devices from Supabase
+                const { data, error } = await supabaseClient
+                    .from('devices')
+                    .select('*')
+                    .order('updated_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Update devices list
+                devices = data || [];
+
+                // Update UI
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (devicesContainerEl) devicesContainerEl.classList.remove('hidden');
+
+                // Render the devices (will filter out current device)
+                renderDevices();
+
+            } catch (error) {
+                console.error('Error loading devices:', error);
+
+                // Update UI with error state
+                if (loadingEl) {
+                    loadingEl.textContent = 'Error loading devices. Please try again.';
+                    loadingEl.classList.remove('hidden');
+                }
+
+                if (noDevicesEl) noDevicesEl.classList.add('hidden');
+                if (devicesContainerEl) devicesContainerEl.classList.add('hidden');
+
+                // Show error to user
+                showAuthError('Failed to load devices. Please refresh the page.');
+            }
+        }
+
+        // Render devices in the grid
+        function renderDevices() {
+            const devicesGrid = document.getElementById('devices-grid');
+            const noDevicesEl = document.getElementById('no-devices');
+
+            if (!devicesGrid) {
+                console.error('Devices grid element not found');
+                return;
+            }
+
+            // Clear existing devices
+            devicesGrid.innerHTML = '';
+
+            // Filter out current device and show message if no other devices
+            const otherDevices = devices.filter(device => device.id !== currentDeviceId);
+
+            if (otherDevices.length === 0) {
+                if (noDevicesEl) {
+                    noDevicesEl.classList.remove('hidden');
+                    noDevicesEl.textContent = 'No other devices found. Register another device to start messaging.';
+                }
+                return;
+            }
+
+            otherDevices.forEach(device => {
+                const isOnline = new Date(device.updated_at) > new Date(Date.now() - 5 * 60 * 1000);
+                const deviceEl = document.createElement('div');
+                deviceEl.className = `device-card ${selectedDeviceId === device.id ? 'active' : ''}`;
+                deviceEl.innerHTML = `
+                    <div class="device-name">
+                        ${device.name || 'Unnamed Device'}
+                        <span class="status ${isOnline ? 'online' : 'offline'}" style="
+                            display: inline-block;
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            background-color: ${isOnline ? '#10b981' : '#9ca3af'};
+                            margin-left: 8px;
+                        "></span>
+                    </div>
+                    <div class="device-id" title="${device.id}">${device.id.substring(0, 8)}...</div>
+                    <div class="device-type">${device.type || 'Unknown'}</div>
+                    <div class="device-last-seen">Last updated: ${formatDate(device.updated_at)}</div>
+                `;
+
+                deviceEl.addEventListener('click', (event) => selectDevice(device, event));
+                devicesGrid.appendChild(deviceEl);
+            });
+        }
+
+        // Select a device for messaging
+        function selectDevice(device, event) {
+            console.log('Selecting device:', device);
+
+            // Debug: Log all device cards
+            const deviceCards = document.querySelectorAll('.device-card');
+            console.log('Found device cards:', deviceCards.length);
+
+            // Update UI
+            deviceCards.forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Add active class to clicked element if event is provided
+            if (event && event.currentTarget) {
+                console.log('Adding active class to:', event.currentTarget);
+                event.currentTarget.classList.add('active');
+            }
+
+            // Update selected device
+            selectedDeviceId = device.id;
+            console.log('Selected device ID:', selectedDeviceId);
+
+            // Debug: Log section elements
+            console.log('messagingSection:', document.getElementById('messaging-section'));
+            console.log('deviceInfoSection:', document.getElementById('device-info-section'));
+
+            // Show messaging section and device info
+            const messagingSection = document.getElementById('messaging-section');
+            const deviceInfoSection = document.getElementById('device-info-section');
+
+            if (messagingSection && deviceInfoSection) {
+                console.log('Removing hidden class from sections');
+                messagingSection.classList.remove('hidden');
+                deviceInfoSection.classList.remove('hidden');
+
+                // Force reflow to ensure the hidden class is removed before any animations
+                void messagingSection.offsetHeight;
+
+                // Debug: Log classes after removal
+                console.log('messagingSection classes:', messagingSection.className);
+                console.log('deviceInfoSection classes:', deviceInfoSection.className);
+            } else {
+                console.error('Required sections not found in DOM');
+            }
+
+            // Get references to message elements
+            const noMessagesSelected = document.getElementById('no-messages-selected');
+            const messageFormContainer = document.getElementById('message-form-container');
+            const targetDeviceName = document.getElementById('target-device-name');
+
+            // Hide the no messages selected message and show the message form
+            if (noMessagesSelected) {
+                console.log('Hiding no-messages-selected');
+                noMessagesSelected.classList.add('hidden');
+            } else {
+                console.warn('no-messages-selected element not found');
+            }
+
+            if (messageFormContainer) {
+                console.log('Showing message form container');
+                messageFormContainer.classList.remove('hidden');
+            } else {
+                console.warn('message-form-container element not found');
+            }
+
+            // Update target device name
+            if (targetDeviceName) {
+                const displayName = device.name || `Device ${device.id.substring(0, 8)}`;
+                console.log('Updating target device name to:', displayName);
+                targetDeviceName.textContent = displayName;
+            } else {
+                console.warn('target-device-name element not found');
+            }
+
+            // Update device info
+            showDeviceInfo(device);
+
+            // Get messages list element
+            const messagesList = document.getElementById('messages');
+
+            // Clear any previous messages and show loading state
+            if (messagesList) {
+                console.log('Clearing messages and showing loading state');
+                messagesList.innerHTML = '<div class="loading">Loading messages...</div>';
+            } else {
+                console.warn('messages element not found');
+            }
+
+            // Initialize messaging in polling-only mode (disable real-time)
+            console.log('Loading messages (polling-only) for device:', device.id);
+            loadMessagesPollingOnly(device.id);
+
+            // Update the URL with the selected device ID for deep linking
+            const url = new URL(window.location);
+            url.searchParams.set('device', device.id);
+            window.history.pushState({}, '', url);
+            console.log('Updated URL to:', url.toString());
+
+            // Get message input elements
+            const messageInput = document.getElementById('message-input');
+            const sendMessageBtn = document.getElementById('send-message-btn');
+
+            // Focus the message input
+            if (messageInput) {
+                console.log('Focusing message input');
+                messageInput.focus();
+
+                if (sendMessageBtn) {
+                    sendMessageBtn.disabled = false;
+                }
+            } else {
+                console.warn('message-input element not found');
+            }
+        }
+
+        // Show device information
+        function showDeviceInfo(device) {
+            deviceInfo.innerHTML = `
+                <strong>ID:</strong> ${device.id}
+                <br><strong>Name:</strong> ${device.name || 'N/A'}
+                <br><strong>Type:</strong> ${device.type || 'N/A'}
+                <br><strong>OS:</strong> ${device.os || 'N/A'}
+                <br><strong>Last Updated:</strong> ${formatDate(device.updated_at)}
+                <br><strong>Created:</strong> ${formatDate(device.created_at)}
+                <br><strong>Is Online:</strong> ${new Date(device.updated_at) > new Date(Date.now() - 5 * 60 * 1000) ? '🟢 Yes' : '🔴 No'}
+                <br><br><strong>Metadata:</strong>
+                <pre>No metadata available</pre>
+            `;
+        }
+
+            // Polling-only variant of loadMessages
+            async function loadMessagesPollingOnly(deviceId) {
+                try {
+                    if (messagesList) messagesList.innerHTML = '';
+                    const systemMessage = {
+                        id: 'sys-msg', from_device_id: 'system', to_device_id: currentDeviceId,
+                        content: 'Polling is active. Messages will be fetched periodically from the database.',
+                        status: 'completed', created_at: new Date().toISOString()
+                    };
+                    addMessageToUI(systemMessage);
+
+                    // Get user for polling
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    if (!user || !user.id) return;
+
+                    // Ensure previous polling is cleared
+                    if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
+                    startPollingFallback(deviceId, user.id);
+                } catch (error) {
+                    console.error('Error initializing polling-only messaging:', error);
+                    addMessageToUI({ id: 'error-msg', from_device_id: 'system', to_device_id: currentDeviceId,
+                        content: 'Error initializing polling: ' + error.message, status: 'failed', created_at: new Date().toISOString() });
+                }
+            }
+
+        // Initialize messaging for a device (no history loading in real-time mode)
+        async function loadMessages(deviceId) {
+            try {
+                // Clear existing messages
+                if (messagesList) {
+                    messagesList.innerHTML = '';
+                }
+
+                // Show a system message about real-time messaging
+                const systemMessage = {
+                    id: 'sys-msg',
+                    from_device_id: 'system',
+                    to_device_id: currentDeviceId,
+                    content: 'Real-time messaging is active. Messages are not stored in the database.',
+                    status: 'completed',
+                    created_at: new Date().toISOString()
+                };
+                addMessageToUI(systemMessage);
+
+                // Subscribe to real-time updates
+                await subscribeToMessages(deviceId);
+
+            } catch (error) {
+                console.error('Error initializing messaging:', error);
+
+                // Show error message in UI
+                const errorMessage = {
+                    id: 'error-msg',
+                    from_device_id: 'system',
+                    to_device_id: currentDeviceId,
+                    content: 'Error initializing messaging: ' + error.message,
+                    status: 'failed',
+                    created_at: new Date().toISOString()
+                };
+                addMessageToUI(errorMessage);
+            }
+        }
+
+        // Subscribe to realtime message updates with robust fallback
+        async function subscribeToMessages(deviceId) {
+            console.log('Subscribing to messages for device:', deviceId);
+
+            // Unsubscribe from previous subscription if exists
+            if (messageSubscription) {
+                console.log('Unsubscribing from previous channel');
+                messageSubscription.unsubscribe();
+            }
+
+            // Stop any existing polling
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+
+            try {
+                // Get the current user ID using the async method
+                const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+                if (userError) {
+                    console.error('Error getting user:', userError);
+                    startPollingFallback(deviceId, user.id);
+                    return null;
+                }
+
+                if (!user || !user.id) {
+                    console.error('User not authenticated for message subscription');
+                    return null;
+                }
+
+                // Create a channel name that matches the desktop app's format
+                const channelName = `device-${deviceId}-${user.id}`;
+                console.log('Creating channel:', channelName);
+
+                let realtimeConnected = false;
+
+                // Subscribe to direct messages
+                messageSubscription = supabaseClient
+                    .channel(channelName, {
+                        config: {
+                            broadcast: { self: true },  // Allow receiving our own broadcasts
+                            presence: {
+                                key: currentDeviceId  // Use device ID as presence key
+                            }
+                        }
+                    })
+                    .on('broadcast', { event: 'direct_message' }, (payload) => {
+                        console.log('Received real-time message:', payload);
+                        const message = payload.payload;
+
+                        // Only process messages where current device is the recipient
+                        if (message.to_device_id === currentDeviceId) {
+                            console.log('Processing incoming real-time message from:', message.from_device_id);
+
+                            // Add message to UI immediately
+                            addMessageToUI(message);
+
+                            // Show notification for new message
+                            const fromDevice = devices.find(d => d.id === message.from_device_id);
+                            if (fromDevice) {
+                                showNotification(`New message from ${fromDevice.name || 'device'}`);
+                            }
+                        }
+                    })
+                    .subscribe((status) => {
+                        console.log('Subscription status:', status);
+                        if (status === 'SUBSCRIBED') {
+                            console.log('Successfully subscribed to real-time channel:', channelName);
+                            realtimeConnected = true;
+                            showNotification('Connected to real-time messaging');
+
+                            // Stop polling if real-time is working
+                            if (pollingInterval) {
+                                clearInterval(pollingInterval);
+                                pollingInterval = null;
+                                console.log('Stopped polling fallback - real-time is working');
+                            }
+                        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                            console.error('Real-time connection failed:', status);
+                            realtimeConnected = false;
+                            showNotification('Real-time connection failed - using polling fallback', 'warning');
+
+                            // Start polling fallback
+                            if (!pollingInterval) {
+                                startPollingFallback(deviceId, user.id);
+                            }
+                        }
+                    });
+
+                // Wait a bit to see if real-time connects
+                setTimeout(() => {
+                    if (!realtimeConnected && !pollingInterval) {
+                        console.log('Real-time didn\'t connect, starting polling fallback');
+                        startPollingFallback(deviceId, user.id);
+                    }
+                }, 3000);
+
+                return messageSubscription;
+            } catch (error) {
+                console.error('Error in subscribeToMessages:', error);
+                showNotification('Failed to connect to real-time messaging - using polling fallback', 'warning');
+
+                // Get user ID for polling fallback
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (user && user.id) {
+                    startPollingFallback(deviceId, user.id);
+                }
+                return null;
+            }
+        }
+
+        // Polling fallback function
+        function startPollingFallback(deviceId, userId) {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+
+            console.log('Starting polling fallback for device:', deviceId);
+            showNotification('Using polling fallback for message delivery', 'info');
+
+            let lastMessageId = null;
+
+            pollingInterval = setInterval(async () => {
+                try {
+                    // Get the actual device_id from the database record
+                    const { data: deviceRecord, error: deviceError } = await supabaseClient
+                        .from('devices')
+                        .select('device_id')
+                        .eq('id', deviceId)
+                        .single();
+
+                    if (deviceError || !deviceRecord) {
+                        console.log('Could not find device record for polling:', deviceError);
+                        return;
+                    }
+
+                    const actualDeviceId = deviceRecord.device_id;
+
+                    const { data: messages, error } = await supabaseClient
+                        .from('messages')
+                        .select('*')
+                        .eq('to_device_id', actualDeviceId)
+                        .eq('user_id', userId)
+                        .eq('status', 'pending')
+                        .order('created_at', { ascending: true })
+                        .limit(10);
+
+                    if (error) {
+                        console.log('Polling error:', error.message);
+                        return;
+                    }
+
+                    if (messages && messages.length > 0) {
+                        messages.forEach(message => {
+                            if (message.id !== lastMessageId) {
+                                lastMessageId = message.id;
+                                console.log('Processing polled message:', message);
+
+                                // Add message to UI
+                                addMessageToUI(message);
+
+                                // Show notification for new message
+                                const fromDevice = devices.find(d => d.device_id === message.from_device_id);
+                                if (fromDevice) {
+                                    showNotification(`New message from ${fromDevice.name || 'device'}`);
+                                }
+                            }
+                        });
+                    }
+                } catch (pollError) {
+                    console.log('Polling failed:', pollError.message);
+                }
+            }, 2000); // Poll every 2 seconds
+        }
+
+        // Show notification helper function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 16px;
+                border-radius: 6px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                background-color: ${type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#10b981'};
+            `;
+
+            document.body.appendChild(notification);
+
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Add a message to the UI
+        function addMessageToUI(message) {
+            if (!messagesList) {
+                console.error('Messages list element not found');
+                return;
+            }
+
+            const isOutgoing = message.from_device_id === currentDeviceId;
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${isOutgoing ? 'outgoing' : 'incoming'}`;
+
+            const statusClass = message.status || 'pending';
+
+            messageEl.innerHTML = `
+                <div class="message-header">
+                    <span>${isOutgoing ? 'You' : 'Them'}</span>
+                    <span class="status ${statusClass}">${statusClass}</span>
+                    <span class="message-time">${formatTime(message.created_at)}</span>
+                </div>
+                <div class="message-content">${escapeHtml(message.content)}</div>
+            `;
+
+            messagesList.appendChild(messageEl);
+
+            // Scroll to the bottom of the messages
+            messagesList.scrollTop = messagesList.scrollHeight;
+
+            // Also ensure the messages container is scrolled to bottom
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // Send a message using robust fallback system
+        async function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const messagesList = document.getElementById('messages');
+
+            if (!messageInput || !messagesList) {
+                console.error('Message input or messages list not found');
+                return;
+            }
+
+            const content = messageInput.value.trim();
+            if (!content || !selectedDeviceId) {
+                console.log('No content or device selected');
+                return;
+            }
+
+            try {
+                // Get current user ID
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user || !user.id) {
+                    throw new Error('User not authenticated');
+                }
+
+                // Create message object for database
+                const messageData = {
+                    from_device_id: currentDeviceId,
+                    to_device_id: selectedDeviceId,
+                    content: content,
+                    message_type: 'text',
+                    status: 'pending',
+                    user_id: user.id
+                };
+
+                console.log('Sending message:', messageData);
+
+                // Create UI message object
+                const uiMessage = {
+                    id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                    from_device_id: currentDeviceId,
+                    to_device_id: selectedDeviceId,
+                    content: content,
+                    status: 'sending',
+                    created_at: new Date().toISOString()
+                };
+
+                // Add to UI immediately with 'sending' status
+                addMessageToUI(uiMessage);
+
+                // Clear input and focus it for next message
+                messageInput.value = '';
+                messageInput.focus();
+
+                // Update UI to show message is being sent
+                const messageEl = messagesList.lastElementChild;
+                if (messageEl) {
+                    const statusEl = messageEl.querySelector('.status');
+                    if (statusEl) {
+                        statusEl.textContent = 'sending';
+                        statusEl.className = 'status sending';
+                    }
+                }
+
+                // Send via database directly (disable real-time)
+                let sentViaRealtime = false;
+
+                // Directly send via database (no real-time)
+                sendViaDatabase(messageData, uiMessage, messageEl);
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showNotification('Failed to send message: ' + error.message, 'error');
+            }
+        }
+
+        // Fallback function to send via database
+        async function sendViaDatabase(messageData, uiMessage, messageEl) {
+            try {
+                console.log('Sending message via database fallback');
+
+                // Get the actual device_id from the database record
+                const { data: deviceRecord, error: deviceError } = await supabaseClient
+                    .from('devices')
+                    .select('device_id')
+                    .eq('id', messageData.to_device_id)
+                    .single();
+
+                if (deviceError || !deviceRecord) {
+                    throw new Error('Could not find target device');
+                }
+
+                // Update the message data to use the actual device_id
+                messageData.to_device_id = deviceRecord.device_id;
+
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert([messageData])
+                    .select()
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log('Message sent successfully via database:', data);
+
+                // Update status to sent
+                uiMessage.status = 'sent';
+                if (messageEl) {
+                    const statusEl = messageEl.querySelector('.status');
+                    if (statusEl) {
+                        statusEl.textContent = 'sent';
+                        statusEl.className = 'status sent';
+                    }
+                }
+
+                showNotification('Message sent via fallback system', 'info');
+
+            } catch (error) {
+                console.error('Database send failed:', error);
+
+                // Update status to failed
+                uiMessage.status = 'failed';
+                if (messageEl) {
+                    const statusEl = messageEl.querySelector('.status');
+                    if (statusEl) {
+                        statusEl.textContent = 'failed';
+                        statusEl.className = 'status failed';
+                    }
+                }
+
+                showNotification('Failed to send message', 'error');
+            }
+        }
+
+        // Get or register the current device
+        async function getOrRegisterCurrentDevice() {
+            try {
+                // Try to get device ID from localStorage
+                let deviceId = localStorage.getItem('deviceId');
+
+                if (deviceId) {
+                    // Check if device exists in the database
+                    const { data: existingDevice, error } = await supabaseClient
+                        .from('devices')
+                        .select('*')
+                        .eq('id', deviceId)
+                        .single();
+
+                    if (!error && existingDevice) {
+                        // Device exists, update updated_at
+                        currentDeviceId = deviceId;
+                        await updateDeviceTimestamp();
+                        return;
+                    }
+                }
+
+                // If we get here, we need to register a new device
+                await registerCurrentDevice();
+
+            } catch (error) {
+                console.error('Error getting/registering device:', error);
+            }
+        }
+
+        // Register the current device
+        async function registerCurrentDevice() {
+            try {
+                // Generate a new device ID
+                const deviceId = crypto.randomUUID();
+
+                // Get device info
+                const deviceInfo = {
+                    name: 'Web Client',
+                    type: 'desktop',
+                    os: navigator.platform,
+                    userAgent: navigator.userAgent
+                };
+
+                // Register device in the database
+                const { data, error } = await supabaseClient
+                    .from('devices')
+                    .insert([{
+                        id: deviceId,
+                        device_id: deviceId,  // Add device_id which is required
+                        user_id: currentUser.id,
+                        name: deviceInfo.name,
+                        type: deviceInfo.type,
+                        os: deviceInfo.os,
+                        updated_at: new Date().toISOString(),
+                        created_at: new Date().toISOString()  // Ensure created_at is set
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Save device ID to localStorage
+                localStorage.setItem('deviceId', deviceId);
+                currentDeviceId = deviceId;
+
+                // Reload devices
+                await loadDevices();
+
+            } catch (error) {
+                console.error('Error registering device:', error);
+                alert('Failed to register device: ' + error.message);
+            }
+        }
+
+        // Update device last seen timestamp
+        async function updateDeviceTimestamp() {
+            if (!currentDeviceId) return;
+
+            try {
+                await supabaseClient
+                    .from('devices')
+                    .update({ updated_at: new Date().toISOString() })
+                    .eq('id', currentDeviceId);
+
+            } catch (error) {
+                console.error('Error updating device timestamp:', error);
+            }
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            if (!dateString) return 'Never';
+
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+
+        // Helper function to format time
+        function formatTime(dateString) {
+            if (!dateString) return '';
+
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).format(date);
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .replace(/\n/g, '<br>');
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
