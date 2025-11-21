@@ -2024,29 +2024,14 @@
             }
 
             async upsertStateMessage() {
-                try {
-                    const { a, b } = this.getCurrentConversationIds();
-                    if (!a || !b || !this.currentUser?.id) return;
-                    const row = {
-                        user_id: this.currentUser.id,
-                        from_device_id: a,
-                        to_device_id: b,
-                        content: JSON.stringify(this.buildStatePayload()),
-                        message_type: 'mesh_state',
-                        status: 'completed'
-                    };
-                    await supabaseClient
-                        .from('messages')
-                        .insert([row])
-                        .select('*');
-                } catch (e) {
-                    console.warn('Failed to upsert state message:', e?.message || e);
-                }
+                // Disabled: do not write mesh state rows to Supabase
+                return;
             }
 
             syncStateDebounced() {
-                clearTimeout(this._syncTimer);
-                this._syncTimer = setTimeout(() => this.upsertStateMessage(), 750);
+                // Disabled: no periodic state sync to Supabase
+                try { clearTimeout(this._syncTimer); } catch(_) {}
+                this._syncTimer = null;
             }
 
             applyRemoteState(stateMsg) {
