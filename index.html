@@ -3,314 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARLO Mesh</title>
+    <title>Mesh | Arlo: The better way to use your computer.</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" type="image/png" href="src/assets/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Manrope:700|Manrope:400" rel="stylesheet">
+
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --bg-tertiary: #2a2a2a;
-            --text-primary: #f5f5f5;
-            --text-secondary: #a0a0a0;
-            --text-tertiary: #707070;
-            --accent: #ffffff;
-            --border: #3a3a3a;
-            --success: #4ade80;
+            --text: #e4e4e7;
+            --textDim: rgba(228, 228, 231, 0.5);
+            --background: #090907;
+            --card-bg: #08080800;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --input-bg: #11111100;
+            --success: #22c55e;
             --warning: #fbbf24;
-            --error: #f87171;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.15);
+            --error: #ef4444;
+            --user-msg: rgba(255, 255, 255, 0.151);
+            --assistant-msg: transparent;
+            --accent: #60a5fa;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
-            background-image: url('browser_background.png');
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            color: var(--text-primary);
+            font-family: 'Manrope';
+            background-color: var(--background);
+            color: var(--text);
             min-height: 100vh;
-            line-height: 1.6;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Login Page */
-        .login-container {
+       .login-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: #090907;
+        }
+
+        .logo-container {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
         }
 
         .login-card {
             width: 100%;
-            max-width: 420px;
+            max-width: 500px;
             padding: 3rem 2.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(40px);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-container.show {
+            display: flex;
+        }
+
+        .login-container.hide {
+            display: none;
+        }
+
+        .logo-card img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45)) brightness(1.05);
         }
 
         .login-card h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 300;
-            letter-spacing: -0.5px;
-            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+            color: var(--text);
+            letter-spacing: -0.02em;
         }
 
         .login-card p {
-            color: var(--text-secondary);
+            color: var(--textDim);
             margin-bottom: 2.5rem;
-            text-align: center;
-            font-size: 1.1rem;
+            font-size: 1.5rem;
+            font-weight: 300;
         }
 
         .form-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.5rem;
         }
 
-        label {
-            display: block;
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        input[type="email"],
-        input[type="password"] {
+        .field {
             width: 100%;
-            padding: 1rem 1.25rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-
-        input[type="email"]::placeholder,
-        input[type="password"]::placeholder {
-            color: #fff;
-        }
-
-        input[type="email"]:focus,
-        input[type="password"]:focus {
+            height: 50px;
+            padding: 0 16px;
+            border-radius: 4px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
             outline: none;
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.2);
+            font-size: 15px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
         }
 
-        button {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: var(--bg-primary);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            font-size: 1rem;
+        .field:focus {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 50px;
+            color: white;
+            background: #141410;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            height: 50px;
+            background: transparent;
+            color: var(--textDim);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        /* OAuth button */
+        .oauth-btn {
+            width: 100%;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #141410;
+            color: #fff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 100%;
+            font-family: 'Manrope', sans-serif;
+            margin-top: 0.75rem;
+        }
+        .oauth-btn:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: var(--textDim);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            font-family: 'Manrope', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--text);
+        }
+
+        /* App Container */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px; /* align with login logo */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
 
-        button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-group {
+        .header-left {
             display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn-group button {
-            flex: 1;
-        }
-
-        /* Main App */
-        .app-container {
-            display: none;
-            flex: 1;
-            padding: 2rem;
+            align-items: center;
             gap: 2rem;
         }
 
-        .app-header {
+       .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-logo img {
+            width: 44px; /* match login logo */
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45)) brightness(1.05);
+        }
+
+        .header-logo span {
+            font-weight: 400;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+
+        .nav-tabs {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+
+        .nav-tab {
+            padding: 0.45rem 0.9rem;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--textDim);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 999px;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+        .nav-tab.active {
+            background: rgba(59, 130, 246, 0.14);
+            color: var(--accent);
+            border-color: rgba(59,130,246,0.35);
+            box-shadow: 0 6px 20px rgba(59,130,246,0.18) inset, 0 2px 10px rgba(0,0,0,0.25);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--textDim);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-hover);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 60px;
+            min-height: 100vh;
+        }
+
+        /* Dashboard */
+        .dashboard-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: var(--textDim);
+            font-size: 0.95rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .dashboard-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--textDim);
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--textDim);
+        }
+
+        .settings-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 0;
-            margin-bottom: 1.5rem;
             border-bottom: 1px solid var(--border);
         }
 
-        .app-header h1 {
-            font-size: 2.25rem;
-            font-weight: 300;
-            letter-spacing: -0.5px;
+        .setting-item:last-child {
+            border-bottom: none;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            color: var(--text-secondary);
-        }
-
-        .logout-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--error);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.6rem 1.25rem;
-            width: auto;
-            font-size: 0.9rem;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 10px;
-        }
-
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: var(--bg-primary);
-        }
-
-        /* Main Layout */
-        .main-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        /* Devices Panel */
-        .devices-panel {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 1.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            height: fit-content;
-        }
-
-        .devices-panel h2 {
-            margin-bottom: 1.5rem;
+        .setting-info h3 {
+            font-size: 0.95rem;
             font-weight: 500;
-            font-size: 1.5rem;
-            color: var(--text-primary);
+            margin-bottom: 0.25rem;
         }
 
-        .devices-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+        .setting-info p {
+            font-size: 0.85rem;
+            color: var(--textDim);
         }
 
-        .device-card {
-            padding: 1.25rem;
+        .danger-zone {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            font-family: 'Manrope', sans-serif;
         }
 
-        .device-card:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateX(4px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .device-card.active {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .device-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .device-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .device-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-
-        .device-status.offline {
-            background: var(--text-tertiary);
-        }
-
-        .device-id {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-family: monospace;
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
         }
 
         /* Chat Interface */
-        .chat-interface {
-            display: flex;
+        .chat-container {
+            display: none;
             flex-direction: column;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 1.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            height: calc(100vh - 200px);
-        }
-
-        .chat-header {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #fff;
-        }
-
-        .chat-header h2 {
-            font-weight: 500;
-            font-size: 1.5rem;
-            color: #fff;
+            max-width: 900px;
+            margin: 0 auto;
+            height: calc(100vh - 60px);
+            padding: 0;
         }
 
         .messages-container {
@@ -318,29 +473,58 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            padding-bottom: 120px;
         }
 
         .messages-list {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .messages-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        #scroll-bottom-btn {
+    position: fixed;
+    left: 50%;
+    bottom: 104px;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    z-index: 1100;
+    opacity: 0.95;
+}
+
+
+        #scroll-bottom-btn.visible { display: flex; }
+        #scroll-bottom-btn:hover {
+            background: rgba(59,130,246,0.16);
+            border-color: rgba(96,165,250,0.35);
         }
 
         .message {
-            max-width: 70%;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
             animation: fadeIn 0.3s ease;
-            position: relative;
-            line-height: 1.5;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: #fff;
         }
 
         @keyframes fadeIn {
@@ -348,81 +532,245 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.incoming {
-            background-color: rgba(255, 255, 255, 0.1);
-            margin-right: auto;
-            border-bottom-left-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .message.outgoing {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            margin-left: auto;
-            border-bottom-right-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .message-status {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            text-transform: capitalize;
-        }
-
-        .message-content {
+        .message.outgoing .message-content {
+            background: var(--user-msg);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 80%;
+            align-self: flex-end;
+            font-size: 0.9375rem;
+            line-height: 1.5;
             word-wrap: break-word;
         }
 
-        .message-form {
+        .message.incoming .message-content {
+            background: transparent;
+            color: var(--text);
+            padding: 0.5rem 0;
+            max-width: 100%;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            animation: typing-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes typing-pulse {
+            0%, 100% {
+                transform: scale(0.85);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 1;
+            }
+        }
+
+        .no-messages {
             display: flex;
-            gap: 1rem;
-            align-items: flex-end;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--textDim);
+            font-size: clamp(2rem, 5vw, 2rem);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            text-align: center;
+            line-height: 1.2;
+            padding: 0 1rem;
+        }
+
+        /* Input Form */
+        .message-form {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 900px;
+            padding: 1.5rem 2rem 2rem 2rem;
+            background: linear-gradient(to top, var(--background) 80%, transparent);
+            z-index: 100;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.6rem 0.6rem 0.6rem 0.6rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(96,165,250,0.45);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.3), 0 0 0 3px rgba(96,165,250,0.12) inset;
+        }
+
+        .device-selector {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .device-selector-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--textDim);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
+            white-space: nowrap;
+        }
+
+        .device-selector-button:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .device-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            flex-shrink: 0;
+        }
+
+        .device-status-dot.offline {
+            background: var(--textDim);
+        }
+
+        .device-dropdown {
+            position: absolute;
+            bottom: calc(100% + 0.5rem);
+            left: 0;
+            min-width: 280px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .device-dropdown.open {
+            display: block;
+        }
+
+        .device-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .device-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .device-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .device-dropdown-item.active {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .device-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-info-name {
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.875rem;
+            margin-bottom: 0.15rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .device-info-id {
+            font-size: 0.7rem;
+            color: var(--textDim);
+            font-family: monospace;
         }
 
         .message-input {
             flex: 1;
-            padding: 1.25rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
             resize: none;
-            min-height: 60px;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .message-input:focus {
+            background: transparent;
+            border: none;
             outline: none;
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-        }
-        .message-input::placeholder {
-            color: #fff;
+            color: var(--text);
+            font-size: 0.9375rem;
+            padding: 0.6rem 0.5rem;
+            font-family: 'Manrope', sans-serif;
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
+        .message-input::-webkit-scrollbar {
+            display: none;
+        }
+
+        .message-input::placeholder {
+            color: var(--textDim);
+        }
 
         .send-btn {
-            width: auto;
-            padding: 1.25rem 1.75rem;
-            align-self: flex-end;
-            background-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            padding: 0.55rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        /* States */
+        .send-btn:hover:not(:disabled) {
+            background: rgba(59, 130, 246, 0.14);
+            border-color: rgba(96,165,250,0.35);
+            box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Utility Classes */
         .hidden {
             display: none !important;
         }
@@ -430,162 +778,310 @@
         .error {
             color: var(--error);
             margin-top: 0.75rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: center;
             padding: 0.75rem;
-            background-color: rgba(248, 113, 113, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 1px solid rgba(248, 113, 113, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .success {
             color: var(--success);
             margin-top: 0.75rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: center;
             padding: 0.75rem;
-            background-color: rgba(74, 222, 128, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 1px solid rgba(74, 222, 128, 0.3);
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .loading {
             text-align: center;
             padding: 2rem;
-            color: var(--text-secondary);
+            color: var(--textDim);
+            font-size: 0.875rem;
         }
 
-        .no-devices, .no-messages {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
+        /* Markdown/prose styling */
+        .message-content.prose {
+            white-space: normal;
+            line-height: 1.6;
         }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .main-layout {
-                grid-template-columns: 280px 1fr;
-            }
-        }
+        .message-content.prose h1,
+        .message-content.prose h2,
+        .message-content.prose h3,
+        .message-content.prose h4,
+        .message-content.prose h5,
+        .message-content.prose h6 { margin: 0.25rem 0 0.5rem; line-height: 1.25; }
+        .message-content.prose p { margin: 0.5rem 0; }
+        .message-content.prose ul, .message-content.prose ol { margin: 0.5rem 1.25rem; padding-left: 1rem; }
+        .message-content.prose li { margin: 0.25rem 0; }
+        .message-content.prose a { color: var(--accent); text-decoration: underline; }
+        .message-content.prose code { background: rgba(255,255,255,0.06); padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .message-content.prose pre { background: #0f0f0f; color: #eaeaea; padding: 0.75rem 1rem; border-radius: 8px; overflow: auto; border: 1px solid rgba(255,255,255,0.08); }
+        .message-content.prose pre code { background: transparent; padding: 0; }
+        .message-content.prose blockquote { margin: 0.5rem 0; padding: 0.5rem 0.75rem; border-left: 3px solid rgba(255,255,255,0.15); color: var(--textDim); background: rgba(255,255,255,0.03); border-radius: 6px; }
+        .message-content.prose code, .message-content.prose pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .app-container {
-                padding: 1rem;
-            }
-
-            .main-layout {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .devices-panel {
-                order: 2;
-            }
-
-            .chat-interface {
-                order: 1;
-                height: 60vh;
-            }
-
-            .message {
-                max-width: 85%;
-            }
-            
             .app-header {
-                flex-direction: column;
+                padding: 0 1rem;
+            }
+
+            .header-left {
                 gap: 1rem;
-                align-items: flex-start;
+            }
+
+            .user-badge {
+                display: none;
+            }
+
+            .dashboard-container {
+                padding: 2rem 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                padding: 0;
+            }
+
+            .message-form {
+                padding: 1rem;
             }
             
-            .user-info {
-                width: 100%;
-                justify-content: space-between;
+            .messages-list {
+                padding: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Login Page -->
-    <div class="login-container" id="login-page">
-        <div class="login-card">
-            <h1>ARLO Mesh</h1>
-            <p>Connect and communicate with your devices</p>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Enter your email">
+   <!-- Login Page - Email Step -->
+        <div class="login-container" id="login-email-page" >
+            <div class="logo-container">
+                <a href="landing.html" class="logo-card">
+                    <img  src="src/assets/LOGO.png" alt="ARLO Logo" />
+                </a>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter your password">
+
+            <div class="login-card">
+                <h1>Welcome to Arlo</h1>
+                <p>The better way to use your computer</p>
+
+                <div class="form-group">
+                    <input type="email" id="email-input" class="field" placeholder="Enter your email">
+                </div>
+
+                <button id="email-continue-btn" class="btn-primary">Continue</button>
+                <button id="show-signup-btn" class="btn-secondary">Create Account</button>
+
+                <button class="oauth-btn google-oauth-btn" id="google-oauth-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12 s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24 s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,16.108,18.961,14,24,14c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657 C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.62-3.317-11.283-7.946l-6.522,5.022C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.793,2.237-2.231,4.166-4.094,5.571l0.003-0.002l6.19,5.238 C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                    Continue with Google
+                </button>
+
+                <div id="email-error" class="error hidden"></div>
             </div>
-            
-            <div class="btn-group">
-                <button id="login-btn">Sign In</button>
-                <button id="signup-btn">Sign Up</button>
-            </div>
-            
-            <div id="auth-error" class="error hidden"></div>
         </div>
+
+    <!-- Login Page - Password Step -->
+<div class="login-container" id="login-password-page" style="display: none;">
+    <div class="logo-container">
+<a href="landing.html" class="logo-card">
+                    <img  src="src/assets/LOGO.png" alt="ARLO Logo" />
+        </a>
     </div>
 
+    <div class="login-card">
+        <button id="back-to-email-btn" class="back-btn">← Back</button>
+
+        <h1>Enter Password</h1>
+        <p id="email-display"></p>
+
+        <div class="form-group">
+            <input type="password" id="password-input" class="field" placeholder="Enter your password">
+        </div>
+
+        <button id="login-btn" class="btn-primary">Sign In</button>
+
+        <div id="password-error" class="error hidden"></div>
+    </div>
+</div>
+
+<!-- Signup Page -->
+<div class="login-container" id="signup-page" style="display: none;">
+    <div class="logo-container">
+        <a href="landing.html" class="logo-card">
+                    <img  src="src/assets/LOGO.png" alt="ARLO Logo" />
+        </a>
+    </div>
+
+    <div class="login-card">
+        <button id="back-to-login-btn" class="back-btn">← Back</button>
+
+        <h1>Create Account</h1>
+        <p>Join Arlo today</p>
+
+        <div class="form-group">
+            <input type="email" id="signup-email" class="field" placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+            <input type="password" id="signup-password" class="field" placeholder="Create a password (min 6 characters)">
+        </div>
+
+        <button id="signup-btn" class="btn-primary">Create Account</button>
+
+        <div id="signup-error" class="error hidden"></div>
+    </div>
+</div>
+
+
     <!-- Main App -->
-    <div class="container" id="app-container">
+    <div class="app-container" id="app-container" style="display: none;">
+        <!-- Header -->
         <div class="app-header">
-            <h1>ARLO Mesh</h1>
-            <div class="user-info">
-                <span>Logged in as: <span id="user-email"></span></span>
+            <div class="header-left">
+                <a href="landing.html" class="header-logo">
+                    <img src="src/assets/LOGO.png" alt="ARLO Logo" />
+                </a>
+
+                <div class="nav-tabs">
+                    <button class="nav-tab active" id="mesh-tab">Mesh</button>
+                    <button class="nav-tab" id="dashboard-tab">Dashboard</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-badge" id="user-email-badge"></div>
                 <button class="logout-btn" id="logout-btn">Sign Out</button>
             </div>
         </div>
 
-        <div class="main-layout">
-            <!-- Devices Panel -->
-            <div class="devices-panel">
-                <h2>Your Devices</h2>
-                <div id="loading-devices" class="loading">Loading devices...</div>
-                <div id="devices-list" class="devices-list hidden">
-                    <!-- Devices will be populated here -->
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard -->
+            <div class="dashboard-container" id="dashboard-container">
+                <div class="dashboard-header">
+                    <h1>Dashboard</h1>
+                    <p>Manage your account and view your statistics</p>
                 </div>
-                <div id="no-devices" class="no-devices hidden">
-                    <p>No other devices found</p>
-                    <button id="register-device-btn" style="margin-top: 1rem;">Register This Device</button>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span class="card-title">Total Devices</span>
+                        </div>
+                        <div class="card-value" id="total-devices">0</div>
+                        <div class="card-subtitle">Connected agents</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span class="card-title">Total Messages</span>
+                        </div>
+                        <div class="card-value" id="total-messages">0</div>
+                        <div class="card-subtitle">Across all conversations via Mesh</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span class="card-title">Active Agents</span>
+                        </div>
+                        <div class="card-value" id="active-devices">0</div>
+                        <div class="card-subtitle">Online now</div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>Account Settings</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Email Address</h3>
+                            <p id="settings-email">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>User ID</h3>
+                            <p id="settings-user-id">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Member Since</h3>
+                            <p id="settings-created">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section danger-zone">
+                    <h2>Danger Zone</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Delete Account</h3>
+                            <p>Permanently delete your account and all associated data</p>
+                        </div>
+                        <button class="btn-danger" id="delete-account-btn">Delete Account</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Chat Interface -->
-            <div class="chat-interface">
-                <div class="chat-header">
-                    <h2>Messages with <span id="target-device-name">[Select a device]</span></h2>
-                </div>
-                
+            <div class="chat-container" id="chat-container">
                 <div class="messages-container">
                     <div id="no-messages-selected" class="no-messages">
-                        Select a device to start messaging
+                        Message your agent over the mesh.
                     </div>
                     
                     <div id="messages-list" class="messages-list hidden">
-                        <div id="messages">
-                            <!-- Messages will be populated here -->
-                        </div>
+                        <div id="messages"></div>
                     </div>
-                    
-                    <div id="message-form" class="message-form hidden">
+                </div>
+
+                <!-- Scroll to bottom button -->
+<button id="scroll-bottom-btn" aria-label="Scroll to bottom" title="Scroll to bottom">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--textDim)" class="bi bi-arrow-down" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+</svg>
+</button>
+
+
+
+                <div id="message-form" class="message-form">
+                    <div class="input-wrapper">
+                        <div class="device-selector">
+                            <button class="device-selector-button" id="device-selector-btn">
+                                <div class="device-status-dot" id="selected-device-status"></div>
+                                <span class="device-name" id="selected-device-name">Agent</span>
+                                <span class="chevron">▼</span>
+                            </button>
+
+                            <div class="device-dropdown" id="device-dropdown">
+                                <div id="loading-devices" class="loading">Loading agents...</div>
+                                <div id="devices-list"></div>
+                            </div>
+                        </div>
+
                         <textarea 
                             id="message-input" 
-                            placeholder="Type your message here..." 
-                            class="message-input"
-                        ></textarea>
-                        <button id="send-message-btn" class="send-btn" disabled>Send</button>
+                            placeholder="Ask anything..." 
+                            class="message-input" 
+                            rows="1"></textarea>
+
+                        <button id="send-message-btn" class="send-btn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                                style="margin-left:8px;">
+                            <polyline points="9 11 4 16 9 21"></polyline>
+                            <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -593,393 +1089,380 @@
     </div>
 
     <script>
-        // Supabase configuration
         const SUPABASE_URL = 'https://npuzhjhnryavazfumhgr.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wdXpoamhucnlhdmF6ZnVtaGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2ODYwODAsImV4cCI6MjA3NDI2MjA4MH0._twwseyV_fCBzoeKBFa6xDet_TOJPaJr6iGiVpz0YPQ';
 
-        // Initialize Supabase client
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 autoRefreshToken: true,
                 persistSession: true,
                 detectSessionInUrl: true
+            },
+            realtime: {
+                params: {
+                    eventsPerSecond: 10
+                }
             }
         });
 
-        // DOM Elements
-        const loginPage = document.getElementById('login-page');
-        const appContainer = document.getElementById('app-container');
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const registerDeviceBtn = document.getElementById('register-device-btn');
-        const messageInput = document.getElementById('message-input');
-        const sendMessageBtn = document.getElementById('send-message-btn');
-        const messagesList = document.getElementById('messages');
-
-        // State
-        let currentUser = null;
-        let devices = [];
-        let selectedDeviceId = null;
-        let currentDeviceId = null;
-        let messageSubscription = null;
-        let pollingInterval = null;
-
-        // Initialize the app
-        async function init() {
-            // Check for existing session
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                await handleAuthStateChange(session);
+        // State management
+        class MeshApp {
+            constructor() {
+                this.currentUser = null;
+                this.currentEmail = '';
+                this.devices = [];
+                this.selectedDevice = null;
+                this.currentDevice = null;
+                this.messageSubscription = null;
+                this.seenMessageIds = new Set();
+                this.typingAnimations = new Map();
+                this.messageOrderCache = new Map();
+                this.messageOrderCursor = 0;
+                this.tempMessageKeyCounter = 0;
+                this.optimisticOrderByTempId = new Map();
+                this.keepAliveInterval = null;
+                this.activeConversationKey = null;
+                this.activeIds = { a: null, b: null };
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.init();
             }
 
-            // Set up auth state listener
-            const { data: { subscription: authListener } } = supabaseClient.auth.onAuthStateChange(handleAuthStateChange);
+            initializeElements() {
+                // Login elements
+                this.loginEmailPage = document.getElementById('login-email-page');
+                this.loginPasswordPage = document.getElementById('login-password-page');
+                this.signupPage = document.getElementById('signup-page');
+                this.appContainer = document.getElementById('app-container');
+                this.dashboardContainer = document.getElementById('dashboard-container');
+                this.chatContainer = document.getElementById('chat-container');
 
-            // Set up event listeners
-            loginBtn.addEventListener('click', handleLogin);
-            signupBtn.addEventListener('click', handleSignup);
-            logoutBtn.addEventListener('click', handleLogout);
-            registerDeviceBtn.addEventListener('click', registerCurrentDevice);
-            sendMessageBtn.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-        }
+                // Login flow
+                this.emailInput = document.getElementById('email-input');
+                this.emailContinueBtn = document.getElementById('email-continue-btn');
+                this.showSignupBtn = document.getElementById('show-signup-btn');
+                this.backToEmailBtn = document.getElementById('back-to-email-btn');
+                this.emailDisplay = document.getElementById('email-display');
+                this.passwordInput = document.getElementById('password-input');
+                this.loginBtn = document.getElementById('login-btn');
+                this.backToLoginBtn = document.getElementById('back-to-login-btn');
+                this.signupEmail = document.getElementById('signup-email');
+                this.signupPassword = document.getElementById('signup-password');
+                this.signupBtn = document.getElementById('signup-btn');
 
-        // Show authentication error
-        function showAuthError(message, type = 'error') {
-            const authError = document.getElementById('auth-error');
-            if (authError) {
-                authError.textContent = message;
-                authError.className = type === 'error' ? 'error' : 'success';
-                authError.classList.remove('hidden');
-            }
-        }
-
-        // Handle authentication state changes
-        async function handleAuthStateChange(event, session) {
-            console.log('Auth state changed:', event, session);
-
-            if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
-                currentUser = session.user;
-
-                // Update UI
-                document.getElementById('user-email').textContent = currentUser.email || 'User';
-                loginPage.style.display = 'none';
-                appContainer.style.display = 'flex';
-
-                // Show loading state for devices
-                document.getElementById('loading-devices').classList.remove('hidden');
-                document.getElementById('devices-list').classList.add('hidden');
-                document.getElementById('no-devices').classList.add('hidden');
-
-                try {
-                    await loadDevices();
-                    await getOrRegisterCurrentDevice();
-                } catch (error) {
-                    console.error('Error in auth state change:', error);
-                    showAuthError('Error initializing application');
-                }
-
-            } else if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
-                currentUser = null;
-                loginPage.style.display = 'flex';
-                appContainer.style.display = 'none';
-
-                if (messageSubscription) {
-                    messageSubscription.unsubscribe();
-                    messageSubscription = null;
-                }
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
-                }
-            }
-        }
-
-        // Handle login
-        async function handleLogin() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!email || !password) {
-                showAuthError('Please enter both email and password');
-                return;
+                // App elements
+                this.meshTab = document.getElementById('mesh-tab');
+                this.dashboardTab = document.getElementById('dashboard-tab');
+                this.logoutBtn = document.getElementById('logout-btn');
+                this.deleteAccountBtn = document.getElementById('delete-account-btn');
+                this.messageInput = document.getElementById('message-input');
+                this.sendMessageBtn = document.getElementById('send-message-btn');
+                this.messagesList = document.getElementById('messages');
+                this.deviceSelectorBtn = document.getElementById('device-selector-btn');
+                this.deviceDropdown = document.getElementById('device-dropdown');
             }
 
-            try {
-                showAuthError('Signing in...', 'success');
+            bindEvents() {
+                // Login flow
+                this.emailContinueBtn.addEventListener('click', () => this.handleEmailContinue());
+                this.showSignupBtn.addEventListener('click', () => this.showSignup());
+                this.backToEmailBtn.addEventListener('click', () => this.showEmailLogin());
+                this.backToLoginBtn.addEventListener('click', () => this.showEmailLogin());
+                this.loginBtn.addEventListener('click', () => this.handleLogin());
+                this.signupBtn.addEventListener('click', () => this.handleSignup());
 
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
+                // App navigation
+                this.meshTab.addEventListener('click', () => this.showMesh());
+                this.dashboardTab.addEventListener('click', () => this.showDashboard());
+
+                // Account management
+                this.logoutBtn.addEventListener('click', () => this.handleLogout());
+                this.deleteAccountBtn.addEventListener('click', () => this.handleDeleteAccount());
+
+                // Chat functionality
+                this.deviceSelectorBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deviceDropdown.classList.toggle('open');
                 });
-
-                if (error) throw error;
-
-            } catch (error) {
-                console.error('Login error:', error);
-                showAuthError(error.message || 'Login failed. Please try again.');
-                document.getElementById('password').value = '';
-            }
-        }
-
-        // Handle signup
-        async function handleSignup() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!email || !password) {
-                showAuthError('Please enter both email and password');
-                return;
-            }
-
-            if (password.length < 6) {
-                showAuthError('Password must be at least 6 characters long');
-                return;
-            }
-
-            try {
-                showAuthError('Creating your account...', 'success');
-
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        emailRedirectTo: window.location.origin
+                document.addEventListener('click', (e) => {
+                    if (!this.deviceDropdown.contains(e.target) && !this.deviceSelectorBtn.contains(e.target)) {
+                        this.deviceDropdown.classList.remove('open');
                     }
                 });
+                this.sendMessageBtn.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                this.messageInput.addEventListener('input', () => this.adjustTextareaHeight());
 
-                if (error) throw error;
-
-                showAuthError('Check your email for the confirmation link!', 'success');
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-
-            } catch (error) {
-                console.error('Signup error:', error);
-                showAuthError(error.message || 'Signup failed. Please try again.');
-                document.getElementById('password').value = '';
-            }
-        }
-
-        // Handle logout
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-        }
-
-        // Load user's devices
-        async function loadDevices() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('devices')
-                    .select('*')
-                    .order('updated_at', { ascending: false });
-
-                if (error) throw error;
-
-                devices = data || [];
-                renderDevices();
-
-            } catch (error) {
-                console.error('Error loading devices:', error);
-                showAuthError('Failed to load devices. Please refresh the page.');
-            }
-        }
-
-        // Render devices list
-        function renderDevices() {
-            const devicesList = document.getElementById('devices-list');
-            const noDevices = document.getElementById('no-devices');
-            const loading = document.getElementById('loading-devices');
-
-            devicesList.innerHTML = '';
-            const otherDevices = devices.filter(device => device.id !== currentDeviceId);
-
-            if (otherDevices.length === 0) {
-                loading.classList.add('hidden');
-                devicesList.classList.add('hidden');
-                noDevices.classList.remove('hidden');
-                return;
-            }
-
-            otherDevices.forEach(device => {
-                const isOnline = new Date(device.updated_at) > new Date(Date.now() - 5 * 60 * 1000);
-                const deviceEl = document.createElement('div');
-                deviceEl.className = `device-card ${selectedDeviceId === device.id ? 'active' : ''}`;
-                deviceEl.innerHTML = `
-                    <div class="device-header">
-                        <div class="device-name">${device.name || 'Unnamed Device'}</div>
-                        <div class="device-status ${isOnline ? '' : 'offline'}"></div>
-                    </div>
-                    <div class="device-id">${device.id.substring(0, 12)}...</div>
-                `;
-
-                deviceEl.addEventListener('click', () => selectDevice(device));
-                devicesList.appendChild(deviceEl);
-            });
-
-            loading.classList.add('hidden');
-            devicesList.classList.remove('hidden');
-            noDevices.classList.add('hidden');
-        }
-
-        // Select a device for messaging
-        function selectDevice(device) {
-            selectedDeviceId = device.id;
-
-            // Update UI
-            document.querySelectorAll('.device-card').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            document.getElementById('target-device-name').textContent = device.name || `Device ${device.id.substring(0, 8)}`;
-            document.getElementById('no-messages-selected').classList.add('hidden');
-            document.getElementById('messages-list').classList.remove('hidden');
-            document.getElementById('message-form').classList.remove('hidden');
-
-            // Clear and load messages
-            messagesList.innerHTML = '<div class="loading">Loading messages...</div>';
-            loadMessagesPollingOnly(device.id);
-
-            // Enable message input
-            messageInput.focus();
-            sendMessageBtn.disabled = false;
-        }
-
-        // Load messages (polling-only)
-        async function loadMessagesPollingOnly(deviceId) {
-            try {
-                messagesList.innerHTML = '';
-                const systemMessage = {
-                    id: 'sys-msg', from_device_id: 'system', to_device_id: currentDeviceId,
-                    content: 'Polling is active. Messages will be fetched periodically.',
-                    status: 'completed', created_at: new Date().toISOString()
-                };
-                addMessageToUI(systemMessage);
-
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user || !user.id) return;
-
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
-                }
-                startPollingFallback(deviceId, user.id);
-            } catch (error) {
-                console.error('Error initializing polling:', error);
-                addMessageToUI({
-                    id: 'error-msg', from_device_id: 'system', to_device_id: currentDeviceId,
-                    content: 'Error initializing polling: ' + error.message, status: 'failed', created_at: new Date().toISOString()
+                // Enter key for login
+                this.emailInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') this.handleEmailContinue();
+                });
+                this.passwordInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') this.handleLogin();
                 });
             }
-        }
 
-        // Start polling fallback
-        function startPollingFallback(deviceId, userId) {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
+            async init() {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    await this.handleAuthStateChange('INITIAL_SESSION', session);
+                }
+
+                supabaseClient.auth.onAuthStateChange((event, session) => {
+                    this.handleAuthStateChange(event, session);
+                });
+
+                this.addOAuthListeners();
             }
-            console.warn('Polling fallback is disabled. Realtime-only mode enforced.');
-            return;
-        }
 
-        // Add message to UI
-        function addMessageToUI(message) {
-            const isOutgoing = message.from_device_id === currentDeviceId;
-            const messageEl = document.createElement('div');
-            messageEl.className = `message ${isOutgoing ? 'outgoing' : 'incoming'}`;
-            messageEl.innerHTML = `
-                <div class="message-header">
-                    <span>${isOutgoing ? 'You' : 'Them'}</span>
-                    <span class="message-status">${message.status}</span>
-                </div>
-                <div class="message-content">${escapeHtml(message.content)}</div>
-            `;
-            messagesList.appendChild(messageEl);
-            messagesList.scrollTop = messagesList.scrollHeight;
-        }
+            // Authentication methods
+            async handleAuthStateChange(event, session) {
+                console.log('Auth state changed:', event, session);
 
-        // Send message
-        async function sendMessage() {
-            const content = messageInput.value.trim();
-            if (!content || !selectedDeviceId) return;
+                if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+                    this.currentUser = session.user;
+                    this.showApp();
+                    
+                    try {
+                        await this.loadDevices();
+                        await this.getOrRegisterCurrentDevice();
+                    } catch (error) {
+                        console.error('Error in auth state change:', error);
+                    }
 
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user || !user.id) throw new Error('User not authenticated');
-
-                const messageData = {
-                    from_device_id: currentDeviceId,
-                    to_device_id: selectedDeviceId,
-                    content: content,
-                    message_type: 'text',
-                    status: 'pending',
-                    user_id: user.id
-                };
-
-                const uiMessage = {
-                    id: 'msg-' + Date.now(),
-                    from_device_id: currentDeviceId,
-                    to_device_id: selectedDeviceId,
-                    content: content,
-                    status: 'sending',
-                    created_at: new Date().toISOString()
-                };
-
-                addMessageToUI(uiMessage);
-                messageInput.value = '';
-                messageInput.focus();
-
-                sendViaDatabase(messageData, uiMessage);
-
-            } catch (error) {
-                console.error('Error sending message:', error);
+                } else if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
+                    this.currentUser = null;
+                    this.showLogin();
+                    this.unsubscribeMessages();
+                    this.stopKeepAlive();
+                }
             }
-        }
 
-        // Send via database
-        async function sendViaDatabase(messageData, uiMessage) {
-            try {
-                if (!messageData.to_device_id) {
-                    uiMessage.status = 'failed';
+            showApp() {
+                this.loginEmailPage.style.display = 'none';
+                this.loginPasswordPage.style.display = 'none';
+                this.signupPage.style.display = 'none';
+                this.appContainer.style.display = 'block';
+                this.chatContainer.style.display = 'flex';
+                this.dashboardContainer.style.display = 'none';
+                
+                document.getElementById('user-email-badge').textContent = this.currentUser.email;
+                this.updateGreeting();
+            }
+
+            showLogin() {
+                this.loginEmailPage.style.display = 'flex';
+                this.loginPasswordPage.style.display = 'none';
+                this.signupPage.style.display = 'none';
+                this.appContainer.style.display = 'none';
+            }
+
+            handleEmailContinue() {
+                const email = this.emailInput.value.trim();
+                if (!email || !email.includes('@')) {
+                    this.showError('email-error', 'Please enter a valid email');
                     return;
                 }
 
-                const { data: deviceRecord, error: deviceError } = await supabaseClient
-                    .from('devices')
-                    .select('device_id')
-                    .eq('id', messageData.to_device_id)
-                    .single();
+                this.hideError('email-error');
+                this.currentEmail = email;
+                this.emailDisplay.textContent = email;
+                this.loginEmailPage.style.display = 'none';
+                this.loginPasswordPage.style.display = 'flex';
+                setTimeout(() => this.passwordInput.focus(), 100);
+            }
 
-                if (deviceError || !deviceRecord) {
-                    throw new Error('Could not find target device');
+            async handleLogin() {
+                const password = this.passwordInput.value.trim();
+                if (!password) {
+                    this.showError('password-error', 'Please enter your password');
+                    return;
                 }
 
-                messageData.to_device_id = deviceRecord.device_id;
+                try {
+                    this.showError('password-error', 'Signing in...', 'success');
 
-                const { data, error } = await supabaseClient
-                    .from('messages')
-                    .insert([messageData])
-                    .select()
-                    .single();
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: this.currentEmail,
+                        password
+                    });
 
-                if (error) throw error;
+                    if (error) throw error;
 
-                uiMessage.status = 'sent';
-
-            } catch (error) {
-                console.error('Database send failed:', error);
-                uiMessage.status = 'failed';
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('password-error', error.message || 'Login failed. Please try again.');
+                    this.passwordInput.value = '';
+                }
             }
-        }
 
-        // Get or register current device
-        async function getOrRegisterCurrentDevice() {
-            try {
+            async handleSignup() {
+                const email = this.signupEmail.value.trim();
+                const password = this.signupPassword.value.trim();
+
+                if (!email || !password || !email.includes('@') || password.length < 6) {
+                    this.showError('signup-error', 'Please enter valid email and password (min 6 characters)');
+                    return;
+                }
+
+                try {
+                    this.showError('signup-error', 'Creating your account...', 'success');
+
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: { emailRedirectTo: window.location.origin }
+                    });
+
+                    if (error) throw error;
+
+                    this.showError('signup-error', 'Check your email for the confirmation link!', 'success');
+                    this.signupEmail.value = '';
+                    this.signupPassword.value = '';
+
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    this.showError('signup-error', error.message || 'Signup failed. Please try again.');
+                    this.signupPassword.value = '';
+                }
+            }
+
+            showSignup() {
+                this.loginEmailPage.style.display = 'none';
+                this.signupPage.style.display = 'flex';
+            }
+
+            showEmailLogin() {
+                this.loginPasswordPage.style.display = 'none';
+                this.signupPage.style.display = 'none';
+                this.loginEmailPage.style.display = 'flex';
+            }
+
+            async handleLogout() {
+                await supabaseClient.auth.signOut();
+            }
+
+            addOAuthListeners() {
+                const googleBtns = document.querySelectorAll('.google-oauth-btn');
+                googleBtns.forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        try {
+                            const redirectTo = window.location.origin + window.location.pathname;
+                            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                                provider: 'google',
+                                options: { redirectTo }
+                            });
+                            if (error) {
+                                try { this.showError('email-error', error.message); } catch (_) { alert(error.message); }
+                            }
+                        } catch (e) {
+                            try { this.showError('email-error', e.message || String(e)); } catch (_) { alert(String(e)); }
+                        }
+                    });
+                });
+            }
+
+            async handleDeleteAccount() {
+                if (!confirm('Are you sure you want to delete your account? This action cannot be undone.') ||
+                    !confirm('This will permanently delete all your data, devices, and messages. Are you absolutely sure?')) {
+                    return;
+                }
+
+                try {
+                    await supabaseClient.from('devices').delete().eq('user_id', this.currentUser.id);
+                    await supabaseClient.from('messages').delete().eq('user_id', this.currentUser.id);
+                    
+                    alert('Your data has been deleted. Please contact support to complete account deletion.');
+                    await this.handleLogout();
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    alert('Error deleting account. Please try again or contact support.');
+                }
+            }
+
+            // Device management
+            async loadDevices() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('devices')
+                        .select('*')
+                        .neq('type', 'web')
+                        .neq('name', 'Web Client')
+                        .order('updated_at', { ascending: false });
+
+                    if (error) throw error;
+
+                    this.devices = data || [];
+                    this.renderDevices();
+
+                } catch (error) {
+                    console.error('Error loading devices:', error);
+                }
+            }
+
+            renderDevices() {
+                const devicesList = document.getElementById('devices-list');
+                const loading = document.getElementById('loading-devices');
+
+                devicesList.innerHTML = '';
+                const otherDevices = this.devices.filter(device => device.id !== this.currentDevice?.id);
+
+                if (otherDevices.length === 0) {
+                    loading.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--textDim);">No agents found</div>';
+                    return;
+                }
+
+                loading.classList.add('hidden');
+
+                otherDevices.forEach(device => {
+                    const isOnline = new Date(device.updated_at) > new Date(Date.now() - 5 * 60 * 1000);
+                    const deviceEl = document.createElement('div');
+                    deviceEl.className = `device-dropdown-item ${this.selectedDevice?.id === device.id ? 'active' : ''}`;
+                    deviceEl.innerHTML = `
+                        <div class="device-status-dot ${isOnline ? '' : 'offline'}"></div>
+                        <div class="device-info">
+                            <div class="device-info-name">${device.name || 'Unnamed Agent'}</div>
+                            <div class="device-info-id">${device.id.substring(0, 16)}...</div>
+                        </div>
+                    `;
+
+                    deviceEl.addEventListener('click', () => this.selectDevice(device));
+                    devicesList.appendChild(deviceEl);
+                });
+            }
+
+            selectDevice(device) {
+                this.selectedDevice = device;
+                
+                // Update UI
+                document.querySelectorAll('.device-dropdown-item').forEach(el => el.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+
+                const isOnline = new Date(device.updated_at) > new Date(Date.now() - 5 * 60 * 1000);
+                const deviceName = device.name || `Agent ${device.id.substring(0, 8)}`;
+                document.getElementById('selected-device-name').textContent = deviceName.substring(0, 6);
+                document.getElementById('selected-device-status').className = `device-status-dot ${isOnline ? '' : 'offline'}`;
+
+                this.deviceDropdown.classList.remove('open');
+
+                // Show messages
+                document.getElementById('no-messages-selected').classList.add('hidden');
+                document.getElementById('messages-list').classList.remove('hidden');
+
+                this.messagesList.innerHTML = '<div class="loading">Loading messages...</div>';
+                this.loadMessages(device);
+
+                this.messageInput.focus();
+                this.sendMessageBtn.disabled = false;
+            }
+
+            async getOrRegisterCurrentDevice() {
                 let deviceId = localStorage.getItem('deviceId');
                 if (deviceId) {
                     const { data: existingDevice, error } = await supabaseClient
@@ -989,75 +1472,899 @@
                         .single();
 
                     if (!error && existingDevice) {
-                        currentDeviceId = deviceId;
-                        await updateDeviceTimestamp();
+                        this.currentDevice = existingDevice;
+                        await this.updateDeviceTimestamp();
                         return;
                     }
                 }
-                await registerCurrentDevice();
-            } catch (error) {
-                console.error('Error getting/registering device:', error);
+                await this.registerCurrentDevice();
+            }
+
+            async registerCurrentDevice() {
+                try {
+                    const deviceId = crypto.randomUUID();
+                    const { data, error } = await supabaseClient
+                        .from('devices')
+                        .insert([{
+                            id: deviceId,
+                            device_id: deviceId,
+                            user_id: this.currentUser.id,
+                            name: 'Web Client',
+                            type: 'web',
+                            os: navigator.platform,
+                            updated_at: new Date().toISOString(),
+                            created_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    localStorage.setItem('deviceId', deviceId);
+                    this.currentDevice = data;
+                    await this.loadDevices();
+
+                } catch (error) {
+                    console.error('Error registering device:', error);
+                }
+            }
+
+            async updateDeviceTimestamp() {
+                if (!this.currentDevice?.id) return;
+                try {
+                    await supabaseClient
+                        .from('devices')
+                        .update({ updated_at: new Date().toISOString() })
+                        .eq('id', this.currentDevice.id);
+                } catch (error) {
+                    console.error('Error updating device timestamp:', error);
+                }
+            }
+
+            // Messaging methods
+            async loadMessages(device) {
+                try {
+                    this.messagesList.innerHTML = '<div class="loading">Loading messages...</div>';
+                    this.unsubscribeMessages();
+
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    if (!user) return;
+
+                    const currentRealId = this.currentDevice?.device_id || this.currentDevice?.id;
+                    const selectedRealId = device.device_id || device.id;
+
+                    console.log('Loading messages between:', currentRealId, 'and', selectedRealId);
+
+                    // Set active conversation identifiers for persistence
+                    this.activeIds = { a: currentRealId, b: selectedRealId };
+                    this.activeConversationKey = this.getConversationKey(currentRealId, selectedRealId);
+
+                    const { data: messages, error } = await supabaseClient
+                        .from('messages')
+                        .select('*')
+                        .or(`from_device_id.eq.${currentRealId},to_device_id.eq.${currentRealId}`)
+                        .or(`from_device_id.eq.${selectedRealId},to_device_id.eq.${selectedRealId}`);
+
+                    if (!error && messages?.length > 0) {
+                        const conversationMessages = messages.filter(msg => 
+                            (msg.from_device_id === currentRealId && msg.to_device_id === selectedRealId) ||
+                            (msg.from_device_id === selectedRealId && msg.to_device_id === currentRealId)
+                        );
+
+                        this.messagesList.innerHTML = '';
+                        this.seenMessageIds.clear();
+                        this.resetConversationOrdering();
+                        // Load persisted ordering for this conversation
+                        this.loadPersistedOrder();
+                        // Then merge any remote state on top
+                        try {
+                            const stateMsgs = conversationMessages.filter(m => m.message_type === 'mesh_state');
+                            if (stateMsgs.length > 0) {
+                                const latest = stateMsgs.reduce((a, b) => {
+                                    const ta = Date.parse(a.updated_at || a.created_at || 0);
+                                    const tb = Date.parse(b.updated_at || b.created_at || 0);
+                                    return tb > ta ? b : a;
+                                });
+                                this.applyRemoteState(latest);
+                            }
+                        } catch (_) {}
+                        
+                        console.log('Found messages:', conversationMessages.length);
+                        
+                        conversationMessages
+                            .filter(m => m.message_type !== 'mesh_state')
+                            .forEach((msg, index) => {
+                                this.ensureMessageOrderValue(msg, index + 1);
+                            });
+
+                        conversationMessages
+                            .filter(m => m.message_type !== 'mesh_state')
+                            .sort((a, b) => this.compareMessages(a, b))
+                            .forEach(m => {
+                                this.addMessageToUI(m, { scroll: false });
+                            });
+
+                        // If no persisted cursor, set to current count so new arrivals append
+                        if (!Number.isFinite(this.messageOrderCursor) || this.messageOrderCursor === 0) {
+                            const nonStateCount = conversationMessages.filter(m => m.message_type !== 'mesh_state').length;
+                            this.messageOrderCursor = nonStateCount;
+                        }
+                        this.persistCursor();
+
+                        this.scrollMessagesToBottom(true);
+                    } else {
+                        this.messagesList.innerHTML = '<div class="no-messages">No messages yet. Start a conversation!</div>';
+                    }
+
+                    this.subscribeToMessages(currentRealId, selectedRealId);
+
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                    this.messagesList.innerHTML = '<div class="error">Error loading messages</div>';
+                }
+            }
+
+            subscribeToMessages(currentRealId, selectedRealId) {
+                try {
+                    this.unsubscribeMessages();
+
+                    const channel = supabaseClient
+                        .channel('messages')
+                        .on('postgres_changes', {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'messages'
+                        }, (payload) => {
+                            const msg = payload.new;
+                            if (!msg) return;
+
+                            const isRelevant = (msg.from_device_id === currentRealId && msg.to_device_id === selectedRealId) ||
+                                (msg.from_device_id === selectedRealId && msg.to_device_id === currentRealId);
+
+                            if (isRelevant) {
+                                // If it's state, apply and don't render
+                                if (msg.message_type === 'mesh_state') {
+                                    try { this.applyRemoteState(msg); } catch (_) {}
+                                    return;
+                                }
+                                console.log('New real-time message:', msg.content, 'at', msg.created_at);
+                                const existingEl = this.messagesList.querySelector(`[data-message-id="${msg.id}"]`);
+                                const orderHint = existingEl ? (Number(existingEl.dataset.order) || ++this.messageOrderCursor) : ++this.messageOrderCursor;
+                                this.addMessageToUI(msg, { animate: true, orderHint });
+
+                                this.scrollMessagesToBottom(true);
+                            }
+                        })
+                        .on('postgres_changes', {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'messages'
+                        }, (payload) => {
+                            const msg = payload.new;
+                            if (!msg) return;
+
+                            const isRelevant = (msg.from_device_id === currentRealId && msg.to_device_id === selectedRealId) ||
+                                (msg.from_device_id === selectedRealId && msg.to_device_id === currentRealId);
+
+                            if (isRelevant) {
+                                // If it's state, apply and don't render
+                                if (msg.message_type === 'mesh_state') {
+                                    try { this.applyRemoteState(msg); } catch (_) {}
+                                    return;
+                                }
+                                console.log('Updated real-time message:', msg.content, 'status:', msg.status);
+                                const existingEl = this.messagesList.querySelector(`[data-message-id="${msg.id}"]`);
+                                const orderHint = existingEl ? (Number(existingEl.dataset.order) || ++this.messageOrderCursor) : ++this.messageOrderCursor;
+                                this.addMessageToUI(msg, { animate: true, orderHint });
+
+                                this.scrollMessagesToBottom(true);
+                            }
+                        })
+                        .subscribe((status) => {
+                            if (status === 'SUBSCRIBED') {
+                                console.log('Subscribed to messages');
+                            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                                console.error('Subscription error, retrying...');
+                                setTimeout(() => {
+                                    this.subscribeToMessages(currentRealId, selectedRealId);
+                                }, 3000);
+                            }
+                        });
+
+                    this.messageSubscription = channel;
+                    
+                } catch (e) {
+                    console.error('Failed to subscribe:', e);
+                    setTimeout(() => {
+                        this.subscribeToMessages(currentRealId, selectedRealId);
+                    }, 3000);
+                }
+            }
+
+            unsubscribeMessages() {
+                if (this.messageSubscription) {
+                    try {
+                        this.messageSubscription.unsubscribe();
+                    } catch (e) {
+                        console.warn('Error unsubscribing:', e);
+                    }
+                    this.messageSubscription = null;
+                }
+            }
+
+            addMessageToUI(message, options = {}) {
+                if (!message || !message.id) return false;
+                if (message.message_type === 'mesh_state') return false; // never render state rows
+
+                const { animate = false, scroll = true, orderHint = null } = options;
+                const messageId = message.id;
+                const currentRealId = this.currentDevice?.device_id || this.currentDevice?.id;
+                const isOutgoing = message.from_device_id === currentRealId;
+
+                let displayContent = '';
+                try {
+                    if (typeof message.content === 'string') {
+                        displayContent = message.content;
+                    } else if (message.content && typeof message.content === 'object') {
+                        displayContent = message.content.text || message.content.response || String(message.content);
+                    } else {
+                        displayContent = String(message.content || '');
+                    }
+                } catch (e) {
+                    console.warn('Error processing message content:', e);
+                    displayContent = String(message.content || '');
+                }
+
+                if (displayContent === '__reserved__' || displayContent === '"__reserved__"') {
+                    displayContent = '__reserved__';
+                }
+
+                const existingEl = this.messagesList.querySelector(`[data-message-id="${messageId}"]`);
+                const previousContent = existingEl?.dataset.lastContent || null;
+
+                let messageEl = existingEl;
+                let contentEl = existingEl?.querySelector('.message-content') || null;
+                let wasCreated = false;
+
+                if (!existingEl) {
+                    wasCreated = true;
+                    messageEl = document.createElement('div');
+                    messageEl.dataset.messageId = messageId;
+                    messageEl.className = `message ${isOutgoing ? 'outgoing' : 'incoming'}`;
+                    contentEl = document.createElement('div');
+                    contentEl.className = 'message-content';
+                    messageEl.appendChild(contentEl);
+                } else {
+                    messageEl.classList.toggle('outgoing', !!isOutgoing);
+                    messageEl.classList.toggle('incoming', !isOutgoing);
+                    if (!contentEl) {
+                        contentEl = document.createElement('div');
+                        contentEl.className = 'message-content';
+                        messageEl.appendChild(contentEl);
+                    }
+                }
+
+                if (!contentEl) {
+                    console.warn('Unable to render message content element', messageId);
+                    return wasCreated;
+                }
+
+                const isReserved = displayContent === '__reserved__';
+                let shouldAnimate = !isOutgoing && !isReserved && animate;
+                if (!shouldAnimate && previousContent === '__reserved__' && !isReserved && !isOutgoing) {
+                    shouldAnimate = true;
+                }
+
+                if (previousContent === displayContent && !isReserved) {
+                    return wasCreated;
+                }
+
+                if (this.typingAnimations.has(messageId)) {
+                    clearInterval(this.typingAnimations.get(messageId));
+                    this.typingAnimations.delete(messageId);
+                }
+
+                if (isReserved) {
+                    contentEl.innerHTML = '<span class="typing-indicator"></span>';
+                    messageEl.dataset.lastContent = displayContent;
+                } else if (shouldAnimate) {
+                    contentEl.innerHTML = '';
+                    const fullText = displayContent;
+                    let index = 0;
+                    const intervalDelay = Math.min(60, Math.max(18, Math.floor(800 / Math.max(fullText.length, 1))));
+                    const intervalId = setInterval(() => {
+                        index += 1;
+                        const partial = fullText.slice(0, index);
+                        contentEl.innerHTML = this.escapeHtml(partial);
+                        if (index >= fullText.length) {
+                            clearInterval(intervalId);
+                            this.typingAnimations.delete(messageId);
+                            contentEl.classList.add('prose');
+                            contentEl.innerHTML = this.renderMarkdown(fullText);
+                        }
+                    }, intervalDelay);
+                    this.typingAnimations.set(messageId, intervalId);
+                    messageEl.dataset.lastContent = fullText;
+                } else {
+                    contentEl.innerHTML = this.escapeHtml(displayContent);
+                    contentEl.classList.add('prose');
+                    contentEl.innerHTML = this.renderMarkdown(displayContent);
+                    messageEl.dataset.lastContent = displayContent;
+                }
+
+                this.insertMessageElement(messageEl, message, orderHint);
+
+                if (wasCreated) {
+                    this.seenMessageIds.add(messageId);
+                }
+
+                if (scroll && (wasCreated || shouldAnimate)) {
+                    this.scrollMessagesToBottom(true);
+                }
+
+                console.log(`${existingEl ? 'Updated' : 'Added'} message UI:`, displayContent.substring(0, 50), 'outgoing:', isOutgoing);
+            return wasCreated;
+        }
+
+        removeMessageFromUI(messageId) {
+            if (!messageId) return;
+            const existingEl = this.messagesList.querySelector(`[data-message-id="${messageId}"]`);
+            if (existingEl) {
+                existingEl.remove();
+                    existingEl.remove();
+                }
+                if (this.typingAnimations.has(messageId)) {
+                    clearInterval(this.typingAnimations.get(messageId));
+                    this.typingAnimations.delete(messageId);
+                }
+                this.seenMessageIds.delete(messageId);
+                this.messageOrderCache.delete(messageId);
+                this.optimisticOrderByTempId.delete(messageId);
+            }
+
+            scrollMessagesToBottom(immediate = false) {
+                const scrollAction = () => {
+                    this.messagesList.scrollTop = this.messagesList.scrollHeight;
+                };
+
+                if (immediate) {
+                    scrollAction();
+                } else {
+                    requestAnimationFrame(scrollAction);
+                }
+            }
+
+            resetConversationOrdering() {
+                this.messageOrderCache.clear();
+                this.messageOrderCursor = 0;
+                this.tempMessageKeyCounter = 0;
+            }
+
+            getMessageCacheKey(message) {
+                if (message?.id) return message.id;
+                if (!message) {
+                    this.tempMessageKeyCounter += 1;
+                    return `temp-${this.tempMessageKeyCounter}`;
+                }
+                if (message.local_temp_id) return message.local_temp_id;
+                if (message.tempId) return message.tempId;
+
+                const stableKey = `${message.from_device_id || 'unknown'}-${message.to_device_id || 'unknown'}-${message.client_sequence || message.created_at || message.timestamp || Date.now()}`;
+                return stableKey;
+            }
+
+            ensureMessageOrderValue(message, defaultOrder = null) {
+                const cacheKey = this.getMessageCacheKey(message);
+                if (this.messageOrderCache.has(cacheKey)) {
+                    return this.messageOrderCache.get(cacheKey);
+                }
+
+                let orderValue = null;
+
+                if (message.client_sequence != null) {
+                    orderValue = Number(message.client_sequence);
+                } else if (message.sequence != null) {
+                    orderValue = Number(message.sequence);
+                } else if (message.timestamp != null) {
+                    orderValue = Number(message.timestamp);
+                } else if (message.created_at) {
+                    // Fallback to created_at only if nothing else
+                    orderValue = Date.parse(message.created_at);
+                }
+
+                if (!Number.isFinite(orderValue)) {
+                    if (defaultOrder != null) {
+                        orderValue = defaultOrder;
+                    } else {
+                        this.messageOrderCursor += 1;
+                        orderValue = this.messageOrderCursor;
+                    }
+                }
+
+                this.messageOrderCache.set(cacheKey, orderValue);
+                return orderValue;
+            }
+
+            compareMessages(a, b) {
+                if (!a && !b) return 0;
+                if (!a) return -1;
+                if (!b) return 1;
+
+                const orderA = this.ensureMessageOrderValue(a);
+                const orderB = this.ensureMessageOrderValue(b);
+
+                if (orderA === orderB) {
+                    const createdA = a.created_at ? Date.parse(a.created_at) : 0;
+                    const createdB = b.created_at ? Date.parse(b.created_at) : 0;
+                    if (createdA === createdB) {
+                        return (a.id || '').localeCompare(b.id || '');
+                    }
+                    return createdA - createdB;
+                }
+
+                return orderA - orderB;
+            }
+
+            insertMessageElement(messageEl, message, orderHint = null) {
+                const container = this.messagesList;
+                if (!container) return;
+
+                // If we already have a persisted order for this server message id, prefer it
+                let desiredOrder = null;
+                if (message?.id) {
+                    const persisted = this.getPersistedOrderForId(message.id);
+                    if (Number.isFinite(persisted)) desiredOrder = persisted;
+                }
+                if (!Number.isFinite(desiredOrder)) {
+                    desiredOrder = orderHint != null ? orderHint : this.ensureMessageOrderValue(message);
+                }
+                messageEl.dataset.order = desiredOrder;
+                // Persist order for server messages
+                if (message?.id) this.persistOrderForId(message.id, desiredOrder);
+
+                const children = Array.from(container.children);
+                if (children.length === 0) {
+                    container.appendChild(messageEl);
+                    return;
+                }
+
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    const childOrder = Number(child.dataset.order);
+                    if (!Number.isFinite(childOrder) || desiredOrder < childOrder) {
+                        container.insertBefore(messageEl, child);
+                        return;
+                    }
+                }
+
+                container.appendChild(messageEl);
+            }
+
+            // ===== Conversation order persistence =====
+            getConversationKey(a, b) {
+                const x = String(a || '');
+                const y = String(b || '');
+                return x < y ? `${x}__${y}` : `${y}__${x}`;
+            }
+
+            storageKey() {
+                return this.activeConversationKey ? `mesh_order_${this.activeConversationKey}` : null;
+            }
+
+            loadPersistedOrder() {
+                const key = this.storageKey();
+                if (!key) return;
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        const orders = parsed.orders || {};
+                        this.messageOrderCursor = Number(parsed.cursor) || 0;
+                        // Do not pre-populate cache with ids we don't have elements for yet; cache lazily on ensure
+                        this._persistedOrders = orders;
+                    }
+                } catch (_) {}
+            }
+
+            savePersistedState() {
+                const key = this.storageKey();
+                if (!key) return;
+                try {
+                    const state = {
+                        cursor: this.messageOrderCursor,
+                        orders: this._persistedOrders || {}
+                    };
+                    localStorage.setItem(key, JSON.stringify(state));
+                    this.syncStateDebounced();
+                } catch (_) {}
+            }
+
+            getPersistedOrderForId(messageId) {
+                if (!messageId) return null;
+                if (!this._persistedOrders) this._persistedOrders = {};
+                const v = this._persistedOrders[messageId];
+                return Number.isFinite(v) ? v : null;
+            }
+
+            persistOrderForId(messageId, order) {
+                if (!messageId || !Number.isFinite(order)) return;
+                if (!this._persistedOrders) this._persistedOrders = {};
+                if (this._persistedOrders[messageId] !== order) {
+                    this._persistedOrders[messageId] = order;
+                    this.savePersistedState();
+                }
+            }
+
+            persistCursor() {
+                this.savePersistedState();
+            }
+
+            // ===== Cross-device sync via state message in messages table =====
+            getStateMessageId() {
+                const key = this.storageKey(); // mesh_order_<a__b>
+                const conv = (key || '').replace(/^mesh_order_/, '');
+                const userId = this.currentUser?.id || 'anon';
+                return `state-${userId}-${conv}`;
+            }
+
+            getCurrentConversationIds() {
+                const a = this.currentDevice?.device_id || this.currentDevice?.id || '';
+                const b = this.selectedDevice?.device_id || this.selectedDevice?.id || '';
+                return { a, b };
+            }
+
+            buildStatePayload() {
+                return {
+                    version: 1,
+                    updated_at: new Date().toISOString(),
+                    cursor: this.messageOrderCursor,
+                    orders: this._persistedOrders || {}
+                };
+            }
+
+            async upsertStateMessage() {
+                try {
+                    const { a, b } = this.getCurrentConversationIds();
+                    if (!a || !b || !this.currentUser?.id) return;
+                    const row = {
+                        user_id: this.currentUser.id,
+                        from_device_id: a,
+                        to_device_id: b,
+                        content: JSON.stringify(this.buildStatePayload()),
+                        message_type: 'mesh_state',
+                        status: 'completed'
+                    };
+                    await supabaseClient
+                        .from('messages')
+                        .insert([row])
+                        .select('*');
+                } catch (e) {
+                    console.warn('Failed to upsert state message:', e?.message || e);
+                }
+            }
+
+            syncStateDebounced() {
+                clearTimeout(this._syncTimer);
+                this._syncTimer = setTimeout(() => this.upsertStateMessage(), 750);
+            }
+
+            applyRemoteState(stateMsg) {
+                try {
+                    const raw = stateMsg?.content;
+                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    if (!parsed || typeof parsed !== 'object') return;
+                    // Merge strategy: prefer remote values (authoritative) and set cursor to remote if higher
+                    const remoteOrders = parsed.orders || {};
+                    if (!this._persistedOrders) this._persistedOrders = {};
+                    for (const [id, order] of Object.entries(remoteOrders)) {
+                        this._persistedOrders[id] = order;
+                    }
+                    if (Number.isFinite(parsed.cursor)) {
+                        const remoteCursor = Number(parsed.cursor);
+                        if (!Number.isFinite(this.messageOrderCursor) || remoteCursor >= this.messageOrderCursor) {
+                            this.messageOrderCursor = remoteCursor;
+                        }
+                    }
+                    this.savePersistedState();
+                } catch (_) {}
+            }
+
+            async sendMessage() {
+                const content = this.messageInput.value.trim();
+                if (!content || !this.selectedDevice) return;
+
+                try {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    if (!user) throw new Error('User not authenticated');
+
+                    // Create optimistic message
+                    const fromDeviceId = this.currentDevice?.device_id || this.currentDevice?.id;
+                    const toDeviceId = this.selectedDevice?.device_id || this.selectedDevice?.id;
+
+                    const optimisticMessage = {
+                        id: 'optimistic-' + Date.now(),
+                        from_device_id: fromDeviceId,
+                        to_device_id: toDeviceId,
+                        content: content,
+                        status: 'sending',
+                        timestamp: Date.now()
+                    };
+
+                    // Allocate order for optimistic and store it
+                    const optOrder = ++this.messageOrderCursor;
+                    this.optimisticOrderByTempId.set(optimisticMessage.id, optOrder);
+                    this.addMessageToUI(optimisticMessage, { orderHint: optOrder });
+                this.messageInput.value = '';
+                this.adjustTextareaHeight();
+                this.messageInput.focus();
+
+                    // Send actual message
+                    const messageData = {
+                        from_device_id: fromDeviceId,
+                        to_device_id: toDeviceId,
+                        content: content,
+                        message_type: 'text',
+                        status: 'pending',
+                        user_id: user.id
+                    };
+
+                    const { data, error } = await supabaseClient
+                        .from('messages')
+                        .insert([messageData])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    this.removeMessageFromUI(optimisticMessage.id);
+                    if (data) {
+                        // Reuse the optimistic order so it doesn't jump above later arrivals
+                        const preservedOrder = optOrder;
+                        this.addMessageToUI(data, { orderHint: preservedOrder });
+                    }
+
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    alert('Failed to send message. Please try again.');
+                }
+            }
+
+            // UI methods
+            showMesh() {
+                this.meshTab.classList.add('active');
+                this.dashboardTab.classList.remove('active');
+                this.chatContainer.style.display = 'flex';
+                this.dashboardContainer.style.display = 'none';
+            }
+
+            async showDashboard() {
+                this.dashboardTab.classList.add('active');
+                this.meshTab.classList.remove('active');
+                this.dashboardContainer.style.display = 'block';
+                this.chatContainer.style.display = 'none';
+                await this.loadDashboardData();
+            }
+
+            updateGreeting() {
+                const el = document.getElementById('no-messages-selected');
+                if (!el) return;
+                const raw = this.currentUser?.email || '';
+                const name = raw.includes('@') ? raw.split('@')[0] : (raw || 'there');
+                el.textContent = `Welcome, ${name}!`;
+            }
+
+            async loadDashboardData() {
+                try {
+                    // Load devices count
+                    const { data: devicesData, error: devicesError } = await supabaseClient
+                        .from('devices')
+                        .select('*', { count: 'exact' })
+                        .eq('user_id', this.currentUser.id)
+                        .neq('type', 'web')
+                        .neq('name', 'Web Client');
+
+                    if (!devicesError) {
+                        const totalDevices = devicesData.length;
+                        const activeDevices = devicesData.filter(d => 
+                            new Date(d.updated_at) > new Date(Date.now() - 5 * 60 * 1000)
+                        ).length;
+                        
+                        document.getElementById('total-devices').textContent = totalDevices;
+                        document.getElementById('active-devices').textContent = activeDevices;
+                    }
+
+                    // Load messages count
+                    const { data: messagesData, error: messagesError } = await supabaseClient
+                        .from('messages')
+                        .select('*', { count: 'exact' })
+                        .eq('user_id', this.currentUser.id);
+
+                    if (!messagesError) {
+                        document.getElementById('total-messages').textContent = messagesData.length;
+                    }
+
+                    // Load user info
+                    document.getElementById('settings-email').textContent = this.currentUser.email;
+                    document.getElementById('settings-user-id').textContent = this.currentUser.id;
+                    const createdDate = new Date(this.currentUser.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    document.getElementById('settings-created').textContent = createdDate;
+
+                } catch (e) {
+                    console.error('Failed to load dashboard data:', e);
+                }
+            }
+
+            // Lightweight Markdown renderer with basic sanitization
+            renderMarkdown(src) {
+                const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+                let text = String(src || '');
+
+                // Extract fenced code blocks first
+                const CODE_TOK = '\uE000CODEBLOCK';
+                const codeBlocks = [];
+                text = text.replace(/```[\s\S]*?```/g, (m) => {
+                    const inner = m.replace(/^```[a-zA-Z0-9_\-]*\n?/, '').replace(/```\s*$/, '');
+                    const idx = codeBlocks.length;
+                    codeBlocks.push(inner);
+                    return CODE_TOK + idx + CODE_TOK;
+                });
+
+                // Escape
+                text = escapeHtml(text);
+
+                // Headings (at line start)
+                text = text.replace(/(^|\n)######\s+([^\n]+)/g, '$1<h6>$2</h6>')
+                           .replace(/(^|\n)#####\s+([^\n]+)/g, '$1<h5>$2</h5>')
+                           .replace(/(^|\n)####\s+([^\n]+)/g, '$1<h4>$2</h4>')
+                           .replace(/(^|\n)###\s+([^\n]+)/g, '$1<h3>$2</h3>')
+                           .replace(/(^|\n)##\s+([^\n]+)/g, '$1<h2>$2</h2>')
+                           .replace(/(^|\n)#\s+([^\n]+)/g, '$1<h1>$2</h1>');
+
+                // Inline code
+                text = text.replace(/`([^`]+)`/g, (m, g1) => `<code>${g1}</code>`);
+
+                // Bold and italic (basic)
+                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                           .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+                           .replace(/(^|[^*])\*([^*]+)\*(?=[^*]|$)/g, '$1<em>$2</em>')
+                           .replace(/(^|[^_])_([^_]+)_(?=[^_]|$)/g, '$1<em>$2</em>');
+
+                // Links [text](url)
+                text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (m, label, url) => {
+                    const safeUrl = url.replace(/"/g, '%22');
+                    return `<a href="${safeUrl}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>`;
+                });
+
+                // Blockquotes per-line
+                text = text.replace(/(^|\n)>\s?([^\n]+)/g, '$1<blockquote>$2</blockquote>');
+
+                // Lists: build simple UL/OL from lines
+                const lines = text.split(/\n/);
+                let out = [];
+                let inUL = false, inOL = false;
+                const closeLists = () => {
+                    if (inUL) { out.push('</ul>'); inUL = false; }
+                    if (inOL) { out.push('</ol>'); inOL = false; }
+                };
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i];
+                    const ulMatch = line.match(/^\s*(?:\-|\*)\s+(.*)$/);
+                    const olMatch = line.match(/^\s*(\d+)\.\s+(.*)$/);
+                    if (ulMatch) {
+                        if (!inUL) { closeLists(); out.push('<ul>'); inUL = true; }
+                        out.push('<li>' + ulMatch[1] + '</li>');
+                    } else if (olMatch) {
+                        if (!inOL) { closeLists(); out.push('<ol>'); inOL = true; }
+                        out.push('<li>' + olMatch[2] + '</li>');
+                    } else {
+                        closeLists();
+                        out.push(line);
+                    }
+                }
+                closeLists();
+                text = out.join('\n');
+
+                // Restore fenced code blocks
+                text = text.replace(new RegExp(CODE_TOK + '(\\d+)' + CODE_TOK, 'g'), (m, idx) => {
+                    const raw = codeBlocks[Number(idx)] || '';
+                    return `<pre><code>${escapeHtml(raw)}</code></pre>`;
+                });
+
+                // Paragraphs: split on double newlines
+                const paraParts = text.split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+                text = paraParts.map(p => {
+                    // Avoid wrapping block elements and lists/headers/pre/ul/ol/blockquote
+                    if (/^<(h\d|ul|ol|pre|blockquote)/i.test(p)) return p;
+                    return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+                }).join('\n');
+
+                return text;
+            }
+
+            adjustTextareaHeight() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 200) + 'px';
+            }
+
+            showError(elementId, message, type = 'error') {
+                const errorEl = document.getElementById(elementId);
+                if (errorEl) {
+                    errorEl.textContent = message;
+                    errorEl.className = type === 'error' ? 'error' : 'success';
+                    errorEl.classList.remove('hidden');
+                }
+            }
+
+            hideError(elementId) {
+                const errorEl = document.getElementById(elementId);
+                if (errorEl) errorEl.classList.add('hidden');
+            }
+
+            escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe
+                    .toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;")
+                    .replace(/\n/g, '<br>');
+            }
+
+            // Keep alive
+            startKeepAlive() {
+                if (this.keepAliveInterval) {
+                    clearInterval(this.keepAliveInterval);
+                }
+                
+                this.keepAliveInterval = setInterval(() => {
+                    if (this.currentUser && this.currentDevice?.id) {
+                        this.updateDeviceTimestamp().catch(console.error);
+                    }
+                }, 30000);
+            }
+
+            stopKeepAlive() {
+                if (this.keepAliveInterval) {
+                    clearInterval(this.keepAliveInterval);
+                    this.keepAliveInterval = null;
+                }
             }
         }
 
-        // Register current device
-        async function registerCurrentDevice() {
-            try {
-                const deviceId = crypto.randomUUID();
-                const { data, error } = await supabaseClient
-                    .from('devices')
-                    .insert([{
-                        id: deviceId,
-                        device_id: deviceId,
-                        user_id: currentUser.id,
-                        name: 'Web Client',
-                        type: 'desktop',
-                        os: navigator.platform,
-                        updated_at: new Date().toISOString(),
-                        created_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new MeshApp();
+        });
+        
+        // Scroll-to-bottom visibility logic
+        (function(){
+            const list = document.getElementById('messages-list');
+            const btn = document.getElementById('scroll-bottom-btn');
+            if (!list || !btn) return;
 
-                if (error) throw error;
+            const updateBtn = () => {
+                const threshold = 120; // px from bottom before showing
+                const atBottom = Math.abs(list.scrollHeight - list.clientHeight - list.scrollTop) <= threshold;
+                btn.classList.toggle('visible', !atBottom);
+            };
 
-                localStorage.setItem('deviceId', deviceId);
-                currentDeviceId = deviceId;
-                await loadDevices();
+            list.addEventListener('scroll', updateBtn, { passive: true });
+            window.addEventListener('resize', updateBtn, { passive: true });
+            btn.addEventListener('click', () => {
+                list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+                btn.classList.remove('visible');
+            });
 
-            } catch (error) {
-                console.error('Error registering device:', error);
-            }
-        }
-
-        // Update device timestamp
-        async function updateDeviceTimestamp() {
-            if (!currentDeviceId) return;
-            try {
-                await supabaseClient
-                    .from('devices')
-                    .update({ updated_at: new Date().toISOString() })
-                    .eq('id', currentDeviceId);
-            } catch (error) {
-                console.error('Error updating device timestamp:', error);
-            }
-        }
-
-        // Helper function to escape HTML
-        function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
-                .toString()
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;")
-                .replace(/\n/g, '<br>');
-        }
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', init);
+            // Run initially and after a short delay to account for layout
+            setTimeout(updateBtn, 300);
+        })();
     </script>
 </body>
 </html>
